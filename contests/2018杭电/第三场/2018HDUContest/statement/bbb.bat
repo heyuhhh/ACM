@@ -1,0 +1,2 @@
+xelatex problems.tex
+pause
