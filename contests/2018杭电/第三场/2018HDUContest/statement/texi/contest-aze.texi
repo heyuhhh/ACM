@@ -1,0 +1,4 @@
+\renewcommand{\contestname}{
+ACM ICPC 2015--2016, NEERC, Azerbaijan Subregional Contest\\
+Baku, October 24, 2015
+}
