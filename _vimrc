@@ -185,6 +185,8 @@ cd D:\vim\ACM\oj
 "设置水平滚动条
 set guioptions+=b
 
-"set encoding=utf-8
+set encoding=utf-8
 "set fileencodings=utf-8,gb2312,gb18030,gbk,ucs-bom,cp936,latin1 " 如果你要打开的文件编码不在此列，那就添加进去
 "set termencoding=utf-8
+set langmenu=zh_CN.UTF-8
+language message zh_CN.UTF-8
