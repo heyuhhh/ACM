@@ -1,8 +1,8 @@
 /*
  * Author:  heyuhhh
  * Created Time:  2019/12/10 19:14:48
- * dp预处理+第二类斯特林数
  */
+// dp预处理+第二类斯特林数
 #include <iostream>
 #include <algorithm>
 #include <cstring>

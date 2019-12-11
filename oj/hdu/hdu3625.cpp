@@ -1,8 +1,8 @@
 /*
  * Author:  heyuhhh
  * Created Time:  2019/12/10 20:02:02
- * 第一类斯特林数，但要排除一号点独自成环的情况
  */
+// 第一类斯特林数，但要排除一号点独自成环的情况
 #include <iostream>
 #include <algorithm>
 #include <cstring>
