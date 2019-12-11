@@ -1,8 +1,5 @@
-/*
- * Author:  heyuhhh
- * Created Time:  2019/12/10 21:02:07
- */
-//斯特林数 
+//斯特林数
+//测试。 
 #include <iostream>
 #include <algorithm>
 #include <cstring>
