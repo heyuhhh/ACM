@@ -1,8 +1,8 @@
 /*
  * Author:  heyuhhh
  * Created Time:  2019/12/10 20:45:43
- * 斯特林公式
  */
+// 斯特林公式
 #include <iostream>
 #include <algorithm>
 #include <cstring>
