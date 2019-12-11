@@ -82,7 +82,7 @@ endif
 "Modified by ghostboyzone@gmail.com
 
 "for ACM
-"¿ì½İ¼üÎªwin·½Ê½
+"windowsä¸‹æ“ä½œæ¨¡å¼
 "source $VIMRUNTIME/mswin.vim
 "behave mswin
 imap <c-d> <c-o>dd
@@ -182,23 +182,23 @@ set printoptions=syntax:n,number:y,portrait:y
 
 cd D:\vim\ACM\oj
 
-"ÉèÖÃË®Æ½¹ö¶¯Ìõ
+"æ°´å¹³æ»šåŠ¨æ¡
 set guioptions+=b
 
 "set encoding=utf-8
-"set fileencodings=utf-8,gb2312,gb18030,gbk,ucs-bom,cp936,latin1 " Èç¹ûÄãÒª´ò¿ªµÄÎÄ¼ş±àÂë²»ÔÚ´ËÁĞ£¬ÄÇ¾ÍÌí¼Ó½øÈ¥
+"set fileencodings=utf-8,gb2312,gb18030,gbk,ucs-bom,cp936,latin1 " ??????Òª?ò¿ªµ??Ä¼????ë²»?Ú´??Ğ£??Ç¾????Ó½?È¥
 "set termencoding=utf-8
 "set langmenu=zh_CN.UTF-8
 "language message zh_CN.UTF-8
 set encoding=utf-8
 set fileencodings=utf-8,chinese,latin-1
-if has("win32")
-set fileencoding=chinese
-else
+"if has("win32")
+"set fileencoding=chinese
+"else
 set fileencoding=utf-8
-endif
-"½â¾ö²Ëµ¥ÂÒÂë
+"endif
+"è§£å†³èœå•ä¹±ç 
 source $VIMRUNTIME/delmenu.vim
 source $VIMRUNTIME/menu.vim
-"½â¾öconsleÊä³öÂÒÂë
-language messages zh_CN.utf-8
+"è§£å†³consleè¾“å‡ºä¹±ç 
+"language messages zh_CN.utf-8
