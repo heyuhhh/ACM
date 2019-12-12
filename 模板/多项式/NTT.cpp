@@ -1,6 +1,6 @@
 const int N = 4e5 + 5, M = 2e6 + 5, P = 998244353, G = 3, Gi = 332748118;
 int n, m, lim = 1, L, r[N];
-ll a[N], b[N];
+ll a[N], b[N];//注意空间要开四倍
 ll qp(ll a, ll k) {
     ll ans = 1;
     while(k) {
