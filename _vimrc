@@ -37,6 +37,7 @@ endfunction
 
 syntax enable
 colorscheme Tomorrow-Night
+"colo desert
 set guifont=Bitstream\ Vera\ Sans\ Mono:h15
 
 
