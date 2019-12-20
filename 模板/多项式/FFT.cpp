@@ -7,7 +7,7 @@ struct C{
 C operator + (C a, C b) {return C(a.x + b.x, a.y + b.y);}
 C operator - (C a, C b) {return C(a.x - b.x, a.y - b.y);}
 C operator * (C a, C b) {return C(a.x * b.x - a.y * b.y, a.x * b.y + a.y * b.x);}
-int l, r[N];
+int r[N];
 void FFT(C *A, int type, int n) {
     for(int i = 0; i < n; i++) if(i < r[i]) swap(A[i], A[r[i]]);
     for(int mid = 1; mid < n; mid <<= 1) {
@@ -21,18 +21,18 @@ void FFT(C *A, int type, int n) {
             }
         }
     }
+    if(type == -1) {
+        for(int i = 0; i < n; i++) A[i].x = A[i].x / lim + 0.5;
+    }
 }
 int n, m;
 void solve(C *a, C *b) {
-    int lim = 1;
-    while(lim <= n + m) lim <<= 1, l++;
-    for(int i = 0; i < lim; i++) {
-        r[i] = (r[i >> 1] >> 1) | ((i & 1) << (l - 1));
-    }
+    int lim = 1, L = 0;
+    while(lim <= n + m) lim <<= 1, ++L;
+    for(int i = 0; i < lim; i++) r[i] = (r[i >> 1] >> 1) | ((i & 1) << (L - 1));
     for(int i = n + 1; i < lim; i++) a[i] = C();
     for(int i = m + 1; i < lim; i++) b[i] = C();
     FFT(a, 1, lim); FFT(b, 1, lim);
     for(int i = 0; i < lim; i++) a[i] = a[i] * b[i];
     FFT(a, -1, lim);
-    for(int i = 0; i < lim; i++) a[i].x = a[i].x / lim + 0.5;
 }
