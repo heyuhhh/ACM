@@ -1,37 +1,29 @@
-namespace R {
-    int n;
-    int w[N][N], kx[N], ky[N], py[N], vy[N], slk[N], pre[N];
-    ll KM() {
-        fill(kx, kx + n + 1, 0);
-        fill(ky, ky + n + 1, 0);
-        fill(py, py + n + 1, 0);
-        for(int i = 1; i <= n; i++) 
-            for(int j = 1; j <= n; j++)
-                kx[i] = max(kx[i], w[i][j]);
-                
-        for(int i = 1; i <= n; i++) {
-            fill(vy, vy + n + 1, 0);
-            fill(slk, slk + n + 1, INF);
-            fill(pre, pre + n + 1, 0);
-            int k = 0, p = -1;
-            for(py[k = 0] = i; py[k]; k = p) {
-                int d = INF;
-                vy[k] = 1;
-                int x = py[k];
-                for(int j = 1; j <= n; j++)
-                    if (!vy[j]) {
-                        int t = kx[x] + ky[j] - w[x][j];
-                        if (t < slk[j]) { slk[j] = t; pre[j] = k; }
-                        if (slk[j] < d) { d = slk[j]; p = j; }
-                    }
-                for(int j = 0; j <= n; j++)
-                    if (vy[j]) { kx[py[j]] -= d; ky[j] += d; }
-                    else slk[j] -= d;
-            }
-            for (; k; k = pre[k]) py[k] = py[pre[k]];
+int cx, cy, ct;
+int vx[N], vy[N], w[N][N];
+int lnk[N], pre[N], slk[N];
+bool vis[N];
+
+void bfs(int x, int y = 0) {
+    lnk[0] = x, memset(pre, 0, (ct + 1) * sizeof(int));
+    memset(slk, 63, (ct + 1) * sizeof(int));
+    memset(vis, false, (ct + 1) * sizeof(bool));
+    for(int ny, mi; lnk[y]; y = ny) {
+        x = lnk[y], mi = INF, vis[y] = true;
+        for(int i = 1; i <= ct; i++) {
+            if(vis[i]) continue;
+            if(slk[i] > vx[x] + vy[i] - w[x][i])
+                slk[i] = vx[x] + vy[i] - w[x][i], pre[i] = y;
+            if(slk[i] < mi) mi = slk[i], ny = i;
         }
-        ll ans = 0;
-        for(int i = 1; i <= n; i++) ans += kx[i] + ky[i];
-        return ans;
+        for(int i = 0; i <= ct; i++)
+            vis[i] ? vx[lnk[i]] -= mi, vy[i] += mi : slk[i] -= mi;
     }
+    for(; y; y = pre[y]) lnk[y] = lnk[pre[y]];
+}
+
+ll km() {
+    for(int i = 1; i <= ct; i++) bfs(i);
+    ll ans = 0;
+    for(int i = 1; i <= ct; i++) ans += vx[i] + vy[i];
+    return ans;
 }
