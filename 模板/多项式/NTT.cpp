@@ -26,7 +26,7 @@ void NTT(ll *A, int type, int n) {
     }
     if(type == -1) {
         ll inv = qpow(n, P - 2);
-        for(int i = 0; i < n; i++) A[i] = A[i] * inv % MOD;   
+        for(int i = 0; i < n; i++) A[i] = A[i] * inv % P;   
     }
 }
 void solve(ll *a, ll *b) {
