@@ -133,9 +133,11 @@ let l = l + 1 | call setline(l, '#include <set>')
 let l = l + 1 | call setline(l, '#include <map>')
 let l = l + 1 | call setline(l, '#include <queue>')
 let l = l + 1 | call setline(l, '#include <iomanip>')
+let l = l + 1 | call setline(l, '#include <assert.h>')
 let l = l + 1 | call setline(l, '#define MP make_pair')
 let l = l + 1 | call setline(l, '#define fi first')
 let l = l + 1 | call setline(l, '#define se second')
+let l = l + 1 | call setline(l, '#define pb push_back')
 let l = l + 1 | call setline(l, "#define sz(x) (int)(x).size()")
 let l = l + 1 | call setline(l, "#define all(x) (x).begin(), (x).end()")
 let l = l + 1 | call setline(l, "#define INF 0x3f3f3f3f")
@@ -145,19 +147,19 @@ let l = l + 1 | call setline(l, "  #define dbg(args...) do { cout << #args << \"
 let l = l + 1 | call setline(l, "  void err() { std::cout << '\\n'; }")
 let l = l + 1 | call setline(l, "  template<typename T, typename...Args>")
 let l = l + 1 | call setline(l, "  void err(T a, Args...args) { std::cout << a << ' '; err(args...); }")
+let l = l + 1 | call setline(l, "  template <template<typename...> class T, typename t, typename... A> ")
+let l = l + 1 | call setline(l, "  void err(const T <t> &arg, const A&... args) {")
+let l = l + 1 | call setline(l, "  for (auto &v : arg) std::cout << v << ' '; err(args...); }")
 let l = l + 1 | call setline(l, "#else")
 let l = l + 1 | call setline(l, "  #define dbg(...)")
 let l = l + 1 | call setline(l, "#endif")
-let l = l + 1 | call setline(l, "void pt() {std::cout << '\\n'; }")
-let l = l + 1 | call setline(l, "template<typename T, typename...Args>")
-let l = l + 1 | call setline(l, "void pt(T a, Args...args) {std::cout << a << ' '; pt(args...); }")
 let l = l + 1 | call setline(l, 'using namespace std;')
 let l = l + 1 | call setline(l, 'typedef long long ll;')
 let l = l + 1 | call setline(l, "typedef pair<int, int> pii;")
 let l = l + 1 | call setline(l, "\/\/head")
 let l = l + 1 | call setline(l, 'const int N = 1e5 + 5;')
 let l = l + 1 | call setline(l, "")
-let l = l + 1 | call setline(l, "void run(){")
+let l = l + 1 | call setline(l, "void run() {")
 let l = l + 1 | call setline(l, "")
 let l = l + 1 | call setline(l, "}")
 let l = l + 1 | call setline(l, "")
@@ -169,6 +171,12 @@ let l = l + 1 | call setline(l, "")
 let l = l + 1 | call setline(l, '    return 0;')
 let l = l + 1 | call setline(l, '}')
 endfunc
+
+let Tlist_Ctags_Cmd = 'D:\vim\vim81\ctags58\ctags.exe'
+let Tlist_Show_One_File=1
+let Tlist_Exit_OnlyWindow=1
+let g:winManagerWindowLayout='FileExplorer|TagList' 
+nmap wm :WMToggle<cr>
 
 map<f4> :call AddComment()<cr>
 func AddComment()
@@ -202,4 +210,4 @@ set fileencoding=utf-8
 source $VIMRUNTIME/delmenu.vim
 source $VIMRUNTIME/menu.vim
 "解决consle输出乱码
-"language messages zh_CN.utf-8
+language messages zh_CN.utf-8
