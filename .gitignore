@@ -5,3 +5,5 @@
 *.out
 
 *.stackdump
+
+test.cpp
