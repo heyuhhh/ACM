@@ -1,6 +1,6 @@
 struct BIT {
     int c[N];
-    int lowbit(x) {return x & (-x);}
+    int lowbit(int x) {return x & (-x);}
     void add(int x, int v = 1) {
         for(; x < N; x += lowbit(x)) c[x] += v;
     }
