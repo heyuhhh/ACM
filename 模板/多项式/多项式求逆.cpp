@@ -26,16 +26,16 @@ void NTT(ll *A, int type, int n) {
     }
     if(type == -1) {
         ll inv = qpow(n, P - 2);
-        for(int i = 0; i < n; i++) A[i] = A[i] * inv % MOD;   
+        for(int i = 0; i < n; i++) A[i] = A[i] * inv % P;   
     }
 }
 
-void solve(int n) {
+void Poly_inv(ll *a, ll *b, int n) {
     if(n == 1) {
         b[0] = qpow(a[0], MOD - 2);
         return;
     }    
-    solve((n + 1) >> 1);
+    Poly_inv(ll *a, ll *b, (n + 1) >> 1);
     int lim = 1, L = 0;
     while(lim < (n << 1)) lim <<= 1, ++L;
     for(int i = 0; i < lim; i++) r[i] = (r[i >> 1] >> 1) | ((i & 1) << (L - 1));
