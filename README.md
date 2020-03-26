@@ -1,7 +1,10 @@
-## ACM of heyuhhh
 
-#### Author: [heyuhhh](https://codeforces.com/profile/heyuhhh)
+#### An Active ACMer/JBer
 
-#### QQ:2468861298
+  * **author:** [heyuhhh](https://codeforces.com/profile/heyuhhh)
 
-#### At Sichuan Agricultural University
+  * **blog:**[here](https://www.cnblogs.com/heyuhhh)
+
+  * **contact details:** 2468861298@qq.com
+
+  * a sophomore, at Sichuan Agricultural University
