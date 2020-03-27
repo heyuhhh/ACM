@@ -113,39 +113,46 @@ inline Poly operator % (const Poly &a, const Poly &b) {
 	c.resize(sz(b) - 1);
 	return c;
 }
-int a[N], b[N]; //b[i] = f(a[i])
+//多点求值
+//b[i] = f(a[i])
 Poly P[N];
-void DC_NTT(int o, int l, int r) {
+void DC_NTT(int o, int l, int r, const Poly& a) {
     if(l == r) {
         P[o].resize(2);
         P[o][0] = MOD - a[l], P[o][1] = 1;
         return;
     }
     int mid = (l + r) >> 1;
-    DC_NTT(o << 1, l, mid), DC_NTT(o << 1|1, mid + 1, r);
+    DC_NTT(o << 1, l, mid, a), DC_NTT(o << 1|1, mid + 1, r, a);
     P[o] = P[o << 1] * P[o << 1|1];
 }
-void solve(const Poly &f, int o, int l, int r) {
-    if(l == r) {
-        b[l] = f[0];
+void DC_MOD(const Poly &f, const Poly &a, Poly &b, int o, int l, int r) {
+    if(r - l <= 400) {
+        for(int i = l; i <= r; i++) {
+            int res = 0;
+            for(int j = sz(f) - 1; j >= 0; j--) res = add(mul(res, a[i]), f[j]);
+            b[i] = res;
+        }   
         return;
-    }   
+    }
     int mid = (l + r) >> 1;
-    Poly rl = f, rr = f;
-    if(sz(rl) >= sz(P[o << 1])) rl = rl % P[o << 1];
-    if(sz(rr) >= sz(P[o << 1|1])) rr = rr % P[o << 1|1];
-    solve(rl, o << 1, l, mid), solve(rr, o << 1|1, mid + 1, r);
+    Poly lf = f, rf = f;
+    if(sz(lf) >= sz(P[o << 1])) lf = lf % P[o << 1];
+    if(sz(rf) >= sz(P[o << 1|1])) rf = rf % P[o << 1|1];
+    DC_MOD(lf, a, b, o << 1, l, mid), DC_MOD(rf, a, b, o << 1|1, mid + 1, r);
 }
-
+void getval(const Poly &f, const Poly &a, Poly &b) {
+    DC_NTT(1, 0, sz(a) - 1, a);
+    DC_MOD(f, a, b, 1, 0, sz(a) - 1);
+}
 void run() {
     init();
     int n, m; cin >> n >> m;
-    Poly f(n + 1);
+    Poly f(n + 1), a(m), b(m);
     for(int i = 0; i <= n; i++) cin >> f[i];
-    for(int i = 1; i <= m; i++) cin >> a[i];
-    DC_NTT(1, 1, m);
-    solve(f, 1, 1, m);
-    for(int i = 1; i <= m; i++) cout << b[i] << '\n';
+    for(int i = 0; i < m; i++) cin >> a[i];
+    getval(f, a, b);
+    for(int i = 0; i < m; i++) cout << b[i] << '\n';
 }
 
 int main() {
