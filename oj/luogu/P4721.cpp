@@ -78,29 +78,28 @@ inline Poly operator * (Poly a, Poly b) {
     return a;
 }
 
-int n;
-Poly f, g;
 //f_i=\sum_{j=0}^{i-1}f_j*g_{i-j},f[0]=1
-void solve(int l, int r) {
+void DC_FFT(int l, int r, Poly &f, const Poly &g) {
     if(l >= r) return;
     int mid = (l + r) >> 1;
-    solve(l, mid);
+    DC_FFT(l, mid, f, g);
     Poly a(r - l), b(r - l);
     Poly c = f;
     for(int i = mid + 1; i <= r; i++) c[i] = 0;
     for(int i = 0; i < r - l; i++) a[i] = c[i + l], b[i] = g[i + 1];
     c = a * b;
     for(int i = mid + 1; i <= r; i++) f[i] = (f[i] + c[i - l - 1]) % MOD;
-    solve(mid + 1, r);
+    DC_FFT(mid + 1, r, f, g);
 }
 
 void run() {
     init();
-    cin >> n;
+    int n; cin >> n;
+    Poly f, g;
     f.resize(n), g.resize(n);
     for(int i = 1; i < n; i++) cin >> g[i];
     f[0] = 1;
-    solve(0, n - 1);
+    DC_FFT(0, n - 1, f, g);
     for(int i = 0; i < n; i++) cout << f[i] << ' ';
 }
 
