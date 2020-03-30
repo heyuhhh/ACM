@@ -48,18 +48,18 @@ inline Poly operator * (Poly a, Poly b) {
     a.resize(n + m - 1);
     return a;
 }
-int n;
-Poly f, g;
+
+//分治FFT
 //f_i=\sum_{j=0}^{i-1}f_j*g_{i-j},f[0]=1
-void solve(int l, int r) {
+void DC_FFT(int l, int r, Poly &f, const Poly &g) {
     if(l >= r) return;
     int mid = (l + r) >> 1;
-    solve(l, mid);
+    DC_FFT(l, mid, f, g);
     Poly a(r - l), b(r - l);
     Poly c = f;
     for(int i = mid + 1; i <= r; i++) c[i] = 0;
     for(int i = 0; i < r - l; i++) a[i] = c[i + l], b[i] = g[i + 1];
     c = a * b;
     for(int i = mid + 1; i <= r; i++) f[i] = (f[i] + c[i - l - 1]) % MOD;
-    solve(mid + 1, r);
+    DC_FFT(mid + 1, r, f, g);
 }
