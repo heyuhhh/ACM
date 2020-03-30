@@ -6,28 +6,38 @@ typedef vector <int> Poly;
 #define cs const
 #define sz(a) (a).size()
 #define all(a) (a).begin(), (a).end()
-const int MOD = 998244353, inv2 = MOD + 1 >> 1;
-const int N = 4e5 + 5; //四倍空间
+const int MOD = 998244353, inv2 = (MOD + 1) >> 1;
+const int N = 4e5 + 5, M = (1 << 19); //四倍空间,M=2^x且M>=N
+typedef vector <int> Poly;
+#define ri register int
+#define cs const
 inline int add(int a, int b) {return a + b >= MOD ? a + b - MOD : a + b;}
 inline int dec(int a, int b) {return a < b ? a - b + MOD : a - b;}
 inline int mul(int a, int b) {return 1ll * a * b % MOD;}
 inline int qpow(int a, int b) {int res = 1; while(b) {if(b & 1) res = mul(res, a); a = mul(a, a); b >>= 1;} return res;}
-int rev[N], inv[N];
-//初始化inv
+int rev[N], inv[N], pw[M], W[2][M];
 inline void init() {
     inv[0] = inv[1] = 1;
     for(ri i = 2; i < N; i++) inv[i] = mul(inv[MOD % i], MOD - MOD / i);
-}
+    int w0 = qpow(3, (MOD - 1) / M), w1 = qpow((MOD + 1) / 3, (MOD - 1) / M);
+    W[0][0] = W[1][0] = 1;
+    for(ri i = 1; i < M; i++) {
+        W[0][i] = mul(W[0][i - 1], w0);
+        W[1][i] = mul(W[1][i - 1], w1);
+    }
+}      
 inline void init_rev(int len) {
     for(ri i = 0; i < len; i++) rev[i] = rev[i >> 1] >> 1 | ((i & 1) * (len >> 1));   
 }
 inline void NTT(Poly &a, int n, int op) {
     for(ri i = 0; i < n; i++) if(i < rev[i]) swap(a[i], a[rev[i]]);
     for(ri i = 1; i < n; i <<= 1) {
-        int wn = qpow(op == -1 ? (MOD + 1) / 3 : 3, (MOD - 1) / i / 2);
-        for(ri j = 0; j < n; j += i << 1) {
-            for(ri k = 0, x, y, w = 1; k < i; ++k, w = mul(w, wn)) {
-                x = a[j + k], y = mul(w, a[j + k + i]);
+        int t = M / (i << 1), t2 = (op == -1 ? 1 : 0);
+        for(ri j = 0; j < i; ++j) pw[j] = W[t2][j * t];
+        int wn = (op == -1 ? W[1][i] : W[0][i]);
+        for(ri j = 0; j < n; j += (i << 1)) {
+            for(ri k = 0, x, y; k < i; ++k) {
+                x = a[j + k], y = mul(pw[k], a[j + k + i]);
                 a[j + k] = add(x, y);
                 a[j + k + i] = dec(x, y);
             }   
