@@ -224,6 +224,76 @@ inline Poly Ksm(Poly a, int k, int lim){
 }
 inline Poly Ksm(cs Poly &a, int k) {return Ksm(a, k, sz(a));}
 
+//分治FFT
+//f_i=\sum_{j=0}^{i-1}f_j*g_{i-j},f[0]=1
+void DC_FFT(int l, int r, Poly &f, const Poly &g) {
+    if(l >= r) return;
+    int mid = (l + r) >> 1;
+    DC_FFT(l, mid, f, g);
+    Poly a(r - l), b(r - l);
+    Poly c = f;
+    for(int i = mid + 1; i <= r; i++) c[i] = 0;
+    for(int i = 0; i < r - l; i++) a[i] = c[i + l], b[i] = g[i + 1];
+    c = a * b;
+    for(int i = mid + 1; i <= r; i++) f[i] = (f[i] + c[i - l - 1]) % MOD;
+    DC_FFT(mid + 1, r, f, g);
+}
+
+//多点求值
+//已知a[i],f，求解b[i] = f(a[i])
+Poly P[N];
+void DC_NTT(int o, int l, int r, const Poly& a) {
+    if(l == r) {
+        P[o].resize(2);
+        P[o][0] = MOD - a[l], P[o][1] = 1;
+        return;
+    }
+    int mid = (l + r) >> 1;
+    DC_NTT(o << 1, l, mid, a), DC_NTT(o << 1|1, mid + 1, r, a);
+    P[o] = P[o << 1] * P[o << 1|1];
+}
+void DC_MOD(const Poly &f, const Poly &a, Poly &b, int o, int l, int r) {
+    if(r - l <= 400) {
+        for(int i = l; i <= r; i++) {
+            int res = 0;
+            for(int j = sz(f) - 1; j >= 0; j--) res = add(mul(res, a[i]), f[j]);
+            b[i] = res;
+        }   
+        return;
+    }
+    int mid = (l + r) >> 1;
+    Poly lf = f, rf = f;
+    if(sz(lf) >= sz(P[o << 1])) lf = lf % P[o << 1];
+    if(sz(rf) >= sz(P[o << 1|1])) rf = rf % P[o << 1|1];
+    DC_MOD(lf, a, b, o << 1, l, mid), DC_MOD(rf, a, b, o << 1|1, mid + 1, r);
+}
+void getval(const Poly &f, const Poly &a, Poly &b) {
+    DC_NTT(1, 0, sz(a) - 1, a);//插值时省略避免重复运算
+    DC_MOD(f, a, b, 1, 0, sz(a) - 1);
+}
+
+//多项式快速插值
+//已知点对(x_i,y_i)，求解插值多项式
+inline Poly DC_NTT2(int o, int l, int r, const Poly& v) {
+    if(r == l) {
+        Poly t(1, v[l]);
+        return t;
+    }
+    int mid = (l + r) >> 1;
+    Poly lf = DC_NTT2(o << 1, l, mid, v), rf = DC_NTT2(o << 1|1, mid + 1, r, v);
+    return lf * P[o << 1|1] + rf * P[o << 1];
+}
+
+inline Poly fast_interpolation(const Poly &x, const Poly &y) {
+    int n = sz(x);
+    DC_NTT(1, 0, n - 1, x);
+    Poly M = P[1], val(n);
+    M = Deriv(M);
+    getval(M, x, val);
+    for(ri i = 0; i < n; i++) val[i] = mul(y[i], qpow(val[i], MOD - 2));
+    return DC_NTT2(1, 0, n - 1, val);
+}
+
 int main() {
     init(); //记住要init
     return 0;   
