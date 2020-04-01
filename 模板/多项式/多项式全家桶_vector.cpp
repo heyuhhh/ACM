@@ -222,7 +222,23 @@ inline Poly Ksm(Poly a, int k, int lim){
 	a.resize(lim);
 	return a;
 }
-inline Poly Ksm(cs Poly &a, int k) {return Ksm(a, k, sz(a));}
+inline Poly Ksm(Poly &a, int k) {
+    int t, x;
+    for(ri i = 0; i < sz(a); i++) if(a[i] > 0) {
+        t = a[i], x = i; break;   
+    }
+    if(t == 1 && x == 0) return Ksm(a, k, sz(a));
+    Poly b(x + 1, 0); b[x] = t;
+    a = a / b;
+    a = Ksm(a, k, sz(a));
+    a.resize(sz(a) + x * k);
+    for(int i = sz(a) - 1; i >= 0; i--) {
+        if(i - x * k < 0) a[i] = 0;
+        else a[i] = a[i - x * k];
+    }
+    a = a * qpow(t, k);
+    return a;
+}
 
 //分治FFT
 //f_i=\sum_{j=0}^{i-1}f_j*g_{i-j},f[0]=1
