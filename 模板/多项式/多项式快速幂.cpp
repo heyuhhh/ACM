@@ -85,6 +85,16 @@ inline Poly Inv(cs Poly &a, int lim) {
 }
 inline Poly Inv(cs Poly &a) {return Inv(a, sz(a));}
 
+inline Poly operator / (Poly a, Poly b) {
+	ri len = 1, deg = sz(a) - sz(b) + 1;
+    reverse(all(a)), reverse(all(b));
+	while(len <= deg) len <<= 1;
+	b = Inv(b, len), b.resize(deg);
+	a = a * b, a.resize(deg);
+    reverse(all(a));
+	return a;
+}
+
 //多项式ln
 inline Poly Ln(Poly a, int lim){
 	a = Integ(Deriv(a) * Inv(a, lim));
@@ -114,4 +124,20 @@ inline Poly Ksm(Poly a, int k, int lim){
 	a.resize(lim);
 	return a;
 }
-inline Poly Ksm(cs Poly &a, int k) {return Ksm(a, k, sz(a));}
+inline Poly Ksm(Poly &a, int k) {
+    int t, x;
+    for(ri i = 0; i < sz(a); i++) if(a[i] > 0) {
+        t = a[i], x = i; break;   
+    }
+    if(t == 1 && x == 0) return Ksm(a, k, sz(a));
+    Poly b(x + 1, 0); b[x] = t;
+    a = a / b;
+    a = Ksm(a, k, sz(a));
+    a.resize(sz(a) + x * k);
+    for(int i = sz(a) - 1; i >= 0; i--) {
+        if(i - x * k < 0) a[i] = 0;
+        else a[i] = a[i - x * k];
+    }
+    a = a * qpow(t, k);
+    return a;
+}
