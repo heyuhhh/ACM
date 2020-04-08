@@ -2,7 +2,6 @@ const int N = 4e5 + 5, M = (1 << 19);
 const double pi = acos(-1.0);
 #define ri register int
 #define cs const
-#define sz(a) (a).size()
 inline int add(int a, int b) {return a + b >= MOD ? a + b - MOD : a + b;}
 inline int dec(int a, int b) {return a < b ? a - b + MOD : a - b;}
 inline int mul(int a, int b) {return 1ll * a * b % MOD;}
