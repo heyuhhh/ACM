@@ -6,4 +6,6 @@
 
 *.stackdump
 
+*.txt
+
 test.cpp
