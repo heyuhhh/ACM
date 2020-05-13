@@ -43,13 +43,11 @@ set guifont=Bitstream\ Vera\ Sans\ Mono:h15
 
 set nu
 set history=1000
-set tabstop=4
-set shiftwidth=4
+set ts=2
+set sw=2
 
-set smarttab
-
-set cindent
-
+set si
+set ci
 
 set showcmd
 
@@ -59,7 +57,6 @@ set noswapfile
 
 set mouse=a
 
-set cin
 set nocp
 
 set guifont=courier_new:h14
@@ -177,7 +174,7 @@ let Tlist_Ctags_Cmd = 'D:\vim\vim81\ctags58\ctags.exe'
 let Tlist_Show_One_File=1
 let Tlist_Exit_OnlyWindow=1
 let g:winManagerWindowLayout='FileExplorer|TagList' 
-nmap wm :WMToggle<cr>
+nmap MW :WMToggle<cr>
 
 map<f4> :call AddComment()<cr>
 func AddComment()
