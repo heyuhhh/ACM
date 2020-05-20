@@ -61,7 +61,7 @@ void dfs(int u, int fa) {
         int v = e[i].v;
         if (v == fa) continue;
         if (dfn[v]) {
-            if ((dfn[u] - dfn[v] + 1) & 1) {
+            if ((deep[u] - deep[v] + 1) & 1) {
                 cout << "NO" << '\n';
                 exit(0);   
             }
@@ -99,11 +99,11 @@ void run() {
     dp[0][sz(odd[0])] = MP(0, 0);
     dp[0][sz(even[0])] = MP(0, 1);
     for (int i = 0; i < blocks - 1; i++) {
-        for (int j = 0; j <= n; j++) if (dp[i][j].fi >= 0) {
-            if (j + sz(odd[i + 1]) <= n) {
+        for (int j = 0; j <= a[1]; j++) if (dp[i][j].fi >= 0) {
+            if (j + sz(odd[i + 1]) <= a[1]) {
                 dp[i + 1][j + sz(odd[i + 1])] = MP(j, 0);
             }
-            if (j + sz(even[i + 1]) <= n) {
+            if (j + sz(even[i + 1]) <= a[1]) {
                 dp[i + 1][j + sz(even[i + 1])] = MP(j, 1);
             }
         }
