@@ -79,3 +79,44 @@ int main() {
     cout << ans;
     return 0;
 }
+
+//可撤销并查集模板
+struct UFS {
+    int f[N], h[N], sz[N], top;
+    struct node {
+        int x, y, fx, h, SZ;
+    }sta[N];
+    void init(int n) {
+        top = 0;
+        for (int i = 1; i <= n; i++) {
+            sz[i] = 1;
+            f[i] = i;
+            h[i] = 0;
+        }
+    }
+    int find(int x) {
+        return f[x] == x ? f[x] : find(f[x]);
+    }
+    bool merge(int u, int v) {
+        int x = find(u), y = find(v);
+        if (x == y) return false;
+        if (h[x] > h[y]) swap(x, y);
+        sta[++top] = node{x, y, f[x], h[y], sz[y]};
+        if (h[x] == h[y]) ++h[y];
+        sz[y] += sz[x];
+        f[x] = y;
+        return true;
+    }
+    void undo(int k) {
+        while (k--) {
+            node it = sta[top--];
+            f[it.x] = it.fx;
+            h[it.y] = it.h;
+            sz[it.y] = it.SZ;
+        }
+    }
+    int query(int x) {
+        int fx = find(x);
+        return sz[fx];
+    }
+} ufs; 
