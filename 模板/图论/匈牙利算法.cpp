@@ -1,22 +1,39 @@
-int match[N],check[N]; 
-int dfs(int x,int nown){
-    for(int i=1;i<=nown;i++){
-        if(!check[i] && link[x][i]){
-            check[i]=1;
-            if(match[i]==-1 || dfs(match[i],nown)){
-                match[i]=x;
-                return 1;
+struct MaxMatch {
+    int n;
+    vector<int> G[N];
+    int vis[N], Match[N], clk;
+    
+    void init(int n) {
+        this->n = n;
+        for (int i = 1; i <= n; i++) G[i].clear();
+        fill(vis + 1, vis + n + 1, -1);
+        fill(Match + 1, Match + n + 1, -1);
+    }
+    
+    void adde(int u, int v) {
+        G[u].push_back(v);
+        G[v].push_back(u);
+    }
+    
+    bool dfs(int u) {
+        for (int v: G[u])
+            if (vis[v] != clk) {
+                vis[v] = clk;
+                if (Match[v] == -1 || dfs(Match[v])) {
+                    Match[u] = v;
+                    Match[v] = u;
+                    return true;
+                }
             }
+        return false;
+    }
+
+    int solve() {
+        int res = 0;
+        for (int i = 1; i <= n; i++, ++clk) {
+            res += dfs(i);
         }
+        return res;
     }
-    return 0;
-}
-int hungry(int n1,int m1){
-    memset(match,-1,sizeof(match));
-    int ans=0;
-    for(int i=1;i<=n1;i++){
-        memset(check,0,sizeof(check));
-        ans+=dfs(i,m1);
-    }
-    return ans ;
-} 
+} MM;
+
