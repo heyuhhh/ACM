@@ -1,0 +1,88 @@
+{
+	// Place your ACM workspace snippets here. Each snippet is defined under a snippet name and has a scope, prefix, body and 
+	// description. Add comma separated ids of the languages where the snippet is applicable in the scope field. If scope 
+	// is left empty or omitted, the snippet gets applied to all languages. The prefix is what is 
+	// used to trigger the snippet and the body will be expanded and inserted. Possible variables are: 
+	// $1, $2 for tab stops, $0 for the final cursor position, and ${1:label}, ${2:another} for placeholders. 
+	// Placeholders with the same ids are connected.
+	// Example:
+	// "Print to console": {
+	// 	"scope": "javascript,typescript",
+	// 	"prefix": "log",
+	// 	"body": [
+	// 		"console.log('$1');",
+	// 		"$2"
+	// 	],
+	// 	"description": "Log output to console"
+	// }
+	"acminit" : {
+		"prefix": "acm",
+		"body": [
+			"// Author : heyuhhh",
+			"// Created Time : ${CURRENT_YEAR}/${CURRENT_MONTH}/${CURRENT_DATE} ${CURRENT_HOUR}:${CURRENT_MINUTE}:${CURRENT_SECOND}",
+			"#include<bits/stdc++.h>",
+			"#define MP make_pair",
+			"#define fi first",
+			"#define se second",
+			"#define pb push_back",
+			"#define sz(x) (int)(x).size()",
+			"#define all(x) (x).begin(), (x).end()",
+			"#define INF 0x3f3f3f3f",
+			"using namespace std;",
+			"typedef long long ll;",
+			"typedef pair<int, int> pii;",
+			"\/\/head",
+			"const int N = 1e5 + 5;",
+
+			"void run() {",
+			"",
+			"}",
+			"int main() {",
+			"\tios::sync_with_stdio(false);",
+			"\tcin.tie(0); cout.tie(0);",
+			"\tcout << fixed << setprecision(20);",
+			"\tint T; cin >> T; while(T--)",
+			"\trun();",
+			"\treturn 0;",
+			"}"
+		],
+		"description": "acminit"
+	},
+	"debug" : {
+		"prefix": "debug",
+		"body": [
+			"#define Local",
+			"void err(int x) {cerr << x;}",
+			"void err(const string &x) {cerr << '\"' << x << '\"';}",
+			"void _print() {cerr << \"]\\n\";}",
+			"template<typename T, typename V>",
+			"void err(const pair<T, V> &x) {cerr << '{'; err(x.first); cerr << ','; err(x.second); cerr << '}';}",
+			"template<typename T>",
+			"void err(const T &x) {int f = 0; cerr << '{'; for (auto &i: x) cerr << (f++ ? \",\" : \"\"), err(i); cerr << \"}\";}",
+			"template <typename T, typename... V>",
+			"void _print(T t, V... v) {err(t); if (sizeof...(v)) cerr << \", \"; _print(v...);}",
+			"#ifdef Local",
+			"#define dbg(x...) cerr << \"[\" << #x << \"] = [\"; _print(x)",
+			"#else",
+			"#define dbg(x...)",
+			"#endif",
+		],
+		"description": "debug"
+	},
+	"qpow" : {
+		"prefix": "qpow", 
+		"body": [
+			"int qpow(ll a, ll b) {", 
+			"\tll res = 1;", 
+			"\twhile(b) {",
+			"\t\tif (b & 1) res = res * a % MOD;",
+			"\t\ta = a * a % MOD;",
+			"\t\tb >>= 1;",
+			"\t}",
+			"\treturn res;",
+			"}"
+		],
+		"description": "quick_pow"
+	}
+}
+
