@@ -17,6 +17,11 @@
     // 运行代码后切换焦点至终端，方便直接输入测试数据
     "code-runner.preserveFocus": false,
     // 在运行代码之前保存文件
-    "code-runner.saveFileBeforeRun": true,    
+    "code-runner.saveFileBeforeRun": true,
+    "files.associations": {
+        "iosfwd": "cpp"
+    },
+    "C_Cpp.clang_format_fallbackStyle": "Google",
+    
 
 }
