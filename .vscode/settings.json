@@ -19,7 +19,8 @@
     // 在运行代码之前保存文件
     "code-runner.saveFileBeforeRun": true,
     "files.associations": {
-        "iosfwd": "cpp"
+        "iosfwd": "cpp",
+        "iostream": "cpp"
     },
     "C_Cpp.clang_format_fallbackStyle": "Google",
     
