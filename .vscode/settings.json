@@ -21,7 +21,8 @@
     "files.associations": {
         "iosfwd": "cpp",
         "iostream": "cpp",
-        "vector": "cpp"
+        "vector": "cpp",
+        "iomanip": "cpp"
     },
     "C_Cpp.clang_format_fallbackStyle": "Google",
     
