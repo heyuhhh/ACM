@@ -1,95 +1,95 @@
-int n;
-vector<int> G[N];
-int fa[N], mt[N], pre[N], mk[N];
-int lca_clk, lca_mk[N];
-pair<int, int> ce[N];
-
-void connect(int u, int v) {
-    mt[u] = v;
-    mt[v] = u;
-}
-int find(int x) { return x == fa[x] ? x : fa[x] = find(fa[x]); }
-
-void flip(int s, int u) {
-    if (s == u) return;
-    if (mk[u] == 2) {
-        int v1 = ce[u].first, v2 = ce[u].second;
-        flip(mt[u], v1);
-        flip(s, v2);
-        connect(v1, v2);
-    } else {
-        flip(s, pre[mt[u]]);
-        connect(pre[mt[u]], mt[u]);
+struct mf {
+    // Time complexity: O(n^3)
+    // 1-based Vertex index
+    // match[x]: vertex matched with x
+    // N: numbers of vertex
+    int vis[N], par[N], orig[N], match[N], aux[N], t, n;
+    vector<int> conn[N];
+    queue<int> Q;
+    void add_edge(int u, int v) {
+        conn[u].push_back(v);
+        conn[v].push_back(u);
     }
-}
-
-int get_lca(int u, int v) {
-    lca_clk++;
-    for (u = find(u), v = find(v); ; u = find(pre[u]), v = find(pre[v])) {
-        if (u && lca_mk[u] == lca_clk) return u;
-        lca_mk[u] = lca_clk;
-        if (v && lca_mk[v] == lca_clk) return v;
-        lca_mk[v] = lca_clk;
-    }
-}
-
-void access(int u, int p, const pair<int, int>& c, vector<int>& q) {
-    for (u = find(u); u != p; u = find(pre[u])) {
-        if (mk[u] == 2) {
-            ce[u] = c;
-            q.push_back(u);
+    void init(int _n) {
+        n = _n;
+        t = 0;
+        for (int i = 0; i <= n; ++i) {
+            conn[i].clear();
+            match[i] = aux[i] = par[i] = 0;
         }
-        fa[find(u)] = find(p);
     }
-}
-
-bool aug(int s) {
-    fill(mk, mk + n + 1, 0);
-    fill(pre, pre + n + 1, 0);
-    iota(fa, fa + n + 1, 0);
-	vector<int> q = {s};
-	mk[s] = 1;
-    int t = 0;
-    for (int t = 0; t < (int) q.size(); ++t) {
-        // q size can be changed
-        int u = q[t];
-        for (int &v: G[u]) {
-            if (find(v) == find(u)) continue;
-            if (!mk[v] && !mt[v]) {
-                flip(s, u);
-                connect(u, v);
-                return true;
-            } else if (!mk[v]) {
-                int w = mt[v];
-                mk[v] = 2; mk[w] = 1;
-                pre[w] = v; pre[v] = u;
-                q.push_back(w);
-            } else if (mk[find(v)] == 1) {
-                int p = get_lca(u, v);
-                access(u, p, {u, v}, q);
-                access(v, p, {v, u}, q);
+    void augment(int u, int v) {
+        int pv = v, nv;
+        do {
+            pv = par[v];
+            nv = match[pv];
+            match[v] = pv;
+            match[pv] = v;
+            v = nv;
+        } while (u != pv);
+    }
+    int lca(int v, int w) {
+        ++t;
+        while (true) {
+            if (v) {
+                if (aux[v] == t) return v;
+                aux[v] = t;
+                v = orig[par[match[v]]];
+            }
+            swap(v, w);
+        }
+    }
+    void blossom(int v, int w, int a) {
+        while (orig[v] != a) {
+            par[v] = w;
+            w = match[v];
+            if (vis[w] == 1) Q.push(w), vis[w] = 0;
+            orig[v] = orig[w] = a;
+            v = par[w];
+        }
+    }
+    bool bfs(int u) {
+        fill(vis + 1, vis + 1 + n, -1);
+        iota(orig + 1, orig + n + 1, 1);
+        Q = queue<int>();
+        Q.push(u);
+        vis[u] = 0;
+        while (!Q.empty()) {
+            int v = Q.front();
+            Q.pop();
+            for (int x : conn[v]) {
+                if (vis[x] == -1) {
+                    par[x] = v;
+                    vis[x] = 1;
+                    if (!match[x]) return augment(u, x), true;
+                    Q.push(match[x]);
+                    vis[match[x]] = 0;
+                } else if (vis[x] == 0 && orig[v] != orig[x]) {
+                    int a = lca(orig[v], orig[x]);
+                    blossom(x, v, a);
+                    blossom(v, x, a);
+                }
             }
         }
+        return false;
     }
-    return false;
-}
-
-int match() {
-    fill(mt + 1, mt + n + 1, 0);
-    lca_clk = 0;
-    int ans = 0;
-    FOR (i, 1, n + 1)
-        if (!mt[i]) ans += aug(i);
-    return ans;
-}
-
-int main() {
-    int m; cin >> n >> m;
-    while (m--) {
-        int u, v; scanf("%d%d", &u, &v);
-        G[u].push_back(v); G[v].push_back(u);
+    int Match() {
+        int ans = 0;
+        // find random matching (not necessary, constant improvement)
+        vector<int> V(n - 1);
+        iota(V.begin(), V.end(), 1);
+        shuffle(V.begin(), V.end(), mt19937(61471));
+        for (auto x : V)
+            if (!match[x]) {
+                for (auto y : conn[x])
+                if (!match[y]) {
+                    match[x] = y, match[y] = x;
+                    ++ans;
+                    break;
+                }
+            }
+        for (int i = 1; i <= n; ++i)
+            if (!match[i] && bfs(i)) ++ans;
+        return ans;
     }
-    printf("%d\n", match());
-    FOR (i, 1, n + 1) printf("%d%c", mt[i], i == _i - 1 ? '\n' : ' ');
-    return 0;
-}
+} mf;
