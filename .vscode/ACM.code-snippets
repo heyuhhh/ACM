@@ -51,8 +51,11 @@
 	"debug" : {
 		"prefix": "debug",
 		"body": [
-			"#define Local",
-			"void err(int x) {cerr << x;}",
+            "#define Local",
+            "void err(int x) {cerr << x;}",
+            "void err(long long x) {cerr << x;}",
+            "void err(double x) {cerr << x;}",
+            "void err(char x) {cerr << '\"' << x << '\"';}",
 			"void err(const string &x) {cerr << '\"' << x << '\"';}",
 			"void _print() {cerr << \"]\\n\";}",
 			"template<typename T, typename V>",
