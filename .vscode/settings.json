@@ -22,7 +22,8 @@
         "iosfwd": "cpp",
         "iostream": "cpp",
         "vector": "cpp",
-        "iomanip": "cpp"
+        "iomanip": "cpp",
+        "ostream": "cpp"
     },
     "C_Cpp.clang_format_fallbackStyle": "Google",
     
