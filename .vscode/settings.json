@@ -23,7 +23,13 @@
         "iostream": "cpp",
         "vector": "cpp",
         "iomanip": "cpp",
-        "ostream": "cpp"
+        "ostream": "cpp",
+        "bitset": "cpp",
+        "valarray": "cpp",
+        "array": "cpp",
+        "initializer_list": "cpp",
+        "regex": "cpp",
+        "utility": "cpp"
     },
     "C_Cpp.clang_format_fallbackStyle": "Google",
     
