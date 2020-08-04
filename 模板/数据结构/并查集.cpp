@@ -1,7 +1,7 @@
 /*
-	�߶���ά���ɳ������鼯��
+	线段树维护可撤销并查集。
 	
-	��Ϊ�ɳ��������Բ���·��ѹ����ע������ʽ�ϲ���
+	因为可撤销，所以不能路径压缩，注意启发式合并。
 */ 
 #include <bits/stdc++.h>
 #define MP make_pair
@@ -80,7 +80,9 @@ int main() {
     return 0;
 }
 
-//�ɳ������鼯ģ��
+// 可撤销并查集
+// 注意merge成功了几次就得回退几次
+// 如果操作连续，那么便可以路径压缩
 struct UFS {
     int f[N], h[N], sz[N], top;
     struct node {
