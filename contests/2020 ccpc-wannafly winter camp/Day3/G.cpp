@@ -38,7 +38,7 @@ const int N = 5e5 + 5;
 int n, k;
 
 struct Edge {
-    int v, w, next;   
+    int v, w, next;     
 }e[N << 1];
 int head[N], tot;
 void adde(int u, int v, int w) {
@@ -81,13 +81,21 @@ void dfs2(int u, int fa) {
 
 void dfs3(int u, int fa, ll h) {
     for(int i = head[u]; i != -1; i = e[i].next) {
-        int v = e[i].v, w = e[i].w;
+        int v = e[i].v, w = e[i].w; 
         if(v == fa) continue;
         ll mx;
-        if(g[u][0] == v) mx = max(h, f[u][1]);
-        else mx = max(h, f[u][0]);
-        L[v] = max(f[v][0], mx + w);
-        dfs3(v, u, mx + w);
+        if(g[u][0] == v) {
+        	mx = max(h, f[u][1]);	
+		} else {
+        	mx = max(h, f[u][0]);	
+		}
+		if (sz[v] == k) {
+			dfs3(v, u, 0);
+		} else {
+			L[v] = mx + w;
+        	dfs3(v, u, L[v]);	
+		}
+        
     }   
 }
 
@@ -101,6 +109,7 @@ void dfs4(int u, int fa) {
 }
 
 void run(){
+	cin >> n >> k;
     memset(head, -1, sizeof(head)); tot = 0;
     for(int i = 1; i < n; i++) {
         int u, v, w; cin >> u >> v >> w;
@@ -112,11 +121,10 @@ void run(){
     }
     dfs(1, 0);
     dfs2(1, 0);
-    L[1] = f[1][0];
     dfs3(1, 0, 0);
     ans[1] <<= 1;
     dfs4(1, 0);
-    for(int i = 1; i <= n; i++) ans[i] -= L[i];
+    for(int i = 1; i <= n; i++) ans[i] -= max(L[i], f[i][0]);
     for(int i = 1; i <= n; i++) cout << ans[i] << '\n';
 }
 
@@ -124,6 +132,6 @@ int main() {
     ios::sync_with_stdio(false);
     cin.tie(0); cout.tie(0);
     cout << fixed << setprecision(20);
-    while(cin >> n >> k) run();
+    run();
     return 0;
 }
