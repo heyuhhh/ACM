@@ -1,46 +1,26 @@
-//	ÈôÖÈĞ¡ÓÚ$n$£¬ÔòÓĞÎŞÇî¶à×é½â£¬µ«Ê×ÏÈÅÅ³ıÎŞ½âµÄÇé¿ö¡£
-//¸ßË¹ÏûÔªÇó½âÒì»ò·½³Ì×é
-int ans = 1;
-for(int i = 1; i <= n; i++) {
-    for(int j = i + 1; j <= n; j++) {
-        if(a[j] > a[i])
-            swap(a[i], a[j]);
-    }
-    if(a[i] == 0) {
-        ans = 1 << (n - i + 1);
-        break ;
-    }
-    if(a[i] == 1) {
-        ans = 0;
-        break ;
-    }
-    for(int k = n; k >= 1 ; k--) {
-        if((1 << k) & a[i]) {
-            for(int j = 1; j <= n ; j++) {
-                if(i != j && (1 << k) & a[j])
-                    a[j] ^= a[i];
-            }
-            break ;
+// é«˜æ–¯æ¶ˆå…ƒæµ®ç‚¹æ•°
+// a: ç³»æ•°çŸ©é˜µ b: å¸¸æ•°åˆ— x: ç­”æ¡ˆåˆ—
+double x[N];
+void Gauss(double a[][N], double* b, int n) {
+    for (int i = 1; i <= n; i++) {
+        int p = i;
+        for (int k = i + 1; k <= n; k++) {
+            if (fabs(a[k][i]) > fabs(a[p][i])) p = k;
         }
-    }
-} 
-//¸ßË¹ÏûÔªÇó½âÍ¬ÓàÄ£·½³Ì
-int now = 1;
-for(int i = 1 ; i <= n ; i++) {
-    int j = now ;
-    while(j <= m && !a[j][i]) j++;
-    if(j > m) continue ;
-    if(j != now) {	
-        for(int k = 1 ; k <= n + 1 ; k++) {
-            swap(a[now][k] , a[j][k]) ;
+        if (i != p) {
+            swap(a[i], a[p]), swap(b[i], b[p]);
         }
-    }
-    for(int j = now + 1 ; j <= m ; j++)
-        if(a[j][i]) {
-            int t = a[j][i] * inv[a[now][i]] % MOD;
-            for(int k = i ; k <= n + 1 ; k++) {
-                a[j][k] = (((a[j][k] - t * a[now][k]) % MOD) + MOD) % MOD;
+        for (int k = i + 1; k <= n; k++) {
+            double d = a[k][i] / a[i][i];
+            b[k] -= d * b[i];
+            for (int j = 1; j <= n; j++) {
+                a[k][j] -= d * a[i][j];
             }
         }
-    now++;
-} 
+    }
+    // å›ä»£ 
+    for (int i = n; i >= 1; i--) {
+        for (int j = i + 1; j <= n; j++) b[i] -= x[j] * a[i][j];
+        x[i] = b[i] / a[i][i];
+    }
+}
