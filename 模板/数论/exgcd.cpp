@@ -19,6 +19,7 @@ ll calc(ll a, ll b, ll c) {
     if(c % g != 0) return -1;
     a /= g, b /= g, c /= g;
     exgcd(a, b, x, y);
+    // x *= c 如果在前面乘以c的话可能得到更小的正整数解
     x = (x % b + b) % b;
     x *= c; //!!!
     return x;

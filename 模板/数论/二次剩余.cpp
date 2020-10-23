@@ -40,10 +40,10 @@ int randint(int n){
     return rand() % n;
 }
 vector <int> remain2(int a, int p){ //x^2 = a (mod p)
-    if (!a || p == 2){ //特判 
+    if (!a || p == 2){ //鐗瑰垽
         return {a, a};
     }
-    if (powermod(a, p - 1 >> 1, p) != 1){ //欧拉准则 
+    if (powermod(a, p - 1 >> 1, p) != 1){ //娆ф媺鍑嗗垯
         return {};
     }
     while (true){

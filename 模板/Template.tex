@@ -50,9 +50,9 @@
 		
 		\vspace*{3\baselineskip}
 		Edited by \\[\baselineskip] {heyuhhh\par}
-		{Team \Large 万物静默如谜 \normalsize{at Sicau}\par }
+		{Team \Large 懂的都懂 \normalsize{at Sicau}\par }
 		\vfill
-		{\scshape 2019.10} \\{\large NANCHONG}\par
+		{\scshape 2020.10} \\{\large NANCHONG}\par
 	\end{titlepage}
 	\newpage            % 封面背后空白页
 	\tableofcontents     % 目录
@@ -116,10 +116,12 @@ int spfa(int s){
 	\end{lstlisting}
 	\section{网络流}
 	\subsection{Dinic}
-复杂度玄学
-	\begin{lstlisting}
+复杂度玄学。
+
+不过在二分图中，用Dinic求最大匹配时间复杂度为$O(n\sqrt{n})$。
+    \begin{lstlisting}
 #define INF 0x3f3f3f3f
-template <class T> //模板，可处理double类型
+template <class T>
 struct Dinic{
     struct Edge{
         int v, next;
@@ -269,6 +271,75 @@ struct Min_Cost_Max_Flow {
 		return res;
 	}
 }sol;
+	\end{lstlisting}
+	不过之前的板子在某些情况下可能会存在问题，一般对时间要求不是很严格的情况可以用下面的板子：
+	\begin{lstlisting}
+struct E {
+    int from, to, cp, v;
+    E() {}
+    E(int f, int t, int cp, int v) : from(f), to(t), cp(cp), v(v) {}
+};
+
+struct MCMF {
+    int n, m, s, t;
+    vector<E> edges;
+    vector<int> G[N];
+    bool inq[N];
+    int d[N], p[N], a[M];
+
+    void init(int _n, int _s, int _t) {
+        n = _n; s = _s; t = _t;
+        for(int i = 0; i <= n; i++) G[i].clear();
+        edges.clear(); m = 0;
+    }
+
+    void addedge(int from, int to, int cap, int cost) {
+        edges.emplace_back(from, to, cap, cost);
+        edges.emplace_back(to, from, 0, -cost);
+        G[from].push_back(m++);
+        G[to].push_back(m++);
+    }
+
+    bool BellmanFord(int &flow, int &cost) {
+        for(int i = 0; i <= n; i++) d[i] = INF;
+        memset(inq, 0, sizeof inq);
+        d[s] = 0, a[s] = INF, inq[s] = true;
+        queue<int> Q; Q.push(s);
+        while (!Q.empty()) {
+            int u = Q.front(); Q.pop();
+            inq[u] = false;
+            for (int& idx: G[u]) {
+                E &e = edges[idx];
+                if (e.cp && d[e.to] > d[u] + e.v) {
+                    d[e.to] = d[u] + e.v;
+                    p[e.to] = idx;
+                    a[e.to] = min(a[u], e.cp);
+                    if (!inq[e.to]) {
+                        Q.push(e.to);
+                        inq[e.to] = true;
+                    }
+                }
+            }
+        }
+        if (d[t] == INF) return false;
+        flow += a[t];
+        cost += a[t] * d[t];
+        int u = t;
+        while (u != s) {
+            edges[p[u]].cp -= a[t];
+            edges[p[u] ^ 1].cp += a[t];
+            u = edges[p[u]].from;
+        }
+        return true;
+    }
+
+    int go() {
+        int flow = 0, cost = 0;
+        while (BellmanFord(flow, cost));
+        return cost;
+    }
+} MM;
+
 	\end{lstlisting}
 	\section{连通性}
 	\subsection{有向图强连通分量}
@@ -460,26 +531,29 @@ int dirMst(int root){
 } 
 	\end{lstlisting}
 	\subsection{最小生成树计数}
-	b为基尔霍夫矩阵，即度数矩阵-邻接矩阵，注意要考虑重边，重复的边只算一次。
+	b为基尔霍夫矩阵，即度数矩阵-邻接矩阵，注意这里的邻接矩阵为广义的邻接矩阵，重边会计算多次。
 	\begin{lstlisting}
+ll b[N][N];
+int g[N][N];
 ll Det(int n){
     int i,j,k;
     ll ret = 1;
     for(i=2;i<=n;i++){
         for(j = i+1;j <= n;j++){
             while(b[j][i]){
-                ll tmp=b[i][i]/b[j][i];//不存在除不尽的情况 
-                for(k = i;k <= n;k++)
-                    b[i][k] -= tmp*b[j][k];
-                for(k=i;k<=n;k++)
-                    swap(b[i][k],b[j][k]);  
+                ll tmp=b[i][i]/b[j][i];//不存在除不尽的情况
+                for(k = i;k <= n;k++){
+                    b[i][k] = (b[i][k] - tmp*b[j][k])%MOD;
+                    if(b[i][k]<0) b[i][k]+=MOD;
+                }
+                swap(b[i],b[j]);
                 ret = -ret;
             }
         }
-        if(!b[i][i]) return 0;
-        ret *= b[i][i];
+        if(!b[i][i]) return -1;
+        ret = ret * b[i][i]%MOD;
     }
-    if(ret < 0) ret = -ret;
+    if(ret < 0) ret += MOD;
     return ret;
 }
 	\end{lstlisting}
@@ -564,30 +638,122 @@ int find(int x){
 	
 	二分图的最大团=补图的最大独立集（图不一定是二分图）
 	
-	以下是匈牙利算法，也可以网络流做，效率更高：
+	以下是匈牙利算法，时间复杂度为$O(nm)$，也可以网络流做，效率更高：
 	\begin{lstlisting}
-int match[N],check[N]; 
-int dfs(int x,int nown){
-    for(int i=1;i<=nown;i++){
-        if(!check[i] && link[x][i]){
-            check[i]=1;
-            if(match[i]==-1 || dfs(match[i],nown)){
-                match[i]=x;
-                return 1;
+struct MaxMatch {
+    int n, m;
+    vector<int> G[N];
+    int vis[N], Match[N], clk;
+    
+    void init(int n, int m) {
+        this->n = n;
+        this->m = m;
+        for (int i = 1; i <= n; i++) G[i].clear();
+        fill(vis + 1, vis + m + 1, -1);
+        fill(Match + 1, Match + m + 1, -1);
+    }
+    
+    void adde(int u, int v) {
+        G[u].push_back(v);
+    }
+    
+    bool dfs(int u) {
+        for (int v: G[u])
+            if (vis[v] != clk) {
+                vis[v] = clk;
+                if (Match[v] == -1 || dfs(Match[v])) {
+                    Match[v] = u;
+                    return true;
+                }
             }
+        return false;
+    }
+    
+    int solve() {
+        int res = 0;
+        for (int i = 1; i <= n; i++, ++clk) {
+            res += dfs(i);
         }
+        return res;
     }
-    return 0;
+} MM;
+
+	\end{lstlisting}
+	\subsection{最大权匹配}
+	KM算法，复杂度为$O(n^3)$。
+	
+	以防到时候看不太懂，贴上两份代码供参考。
+	\begin{lstlisting}
+int cx, cy, ct;// ct为左右两部点数量的最大值
+int vx[N], vy[N], w[N][N];
+int lnk[N], pre[N], slk[N];
+bool vis[N];
+
+void bfs(int x, int y = 0) {
+    lnk[0] = x, memset(pre, 0, (ct + 1) * sizeof(int));
+    memset(slk, 63, (ct + 1) * sizeof(int));
+    memset(vis, false, (ct + 1) * sizeof(bool));
+    for(int ny, mi; lnk[y]; y = ny) {
+        x = lnk[y], mi = INF, vis[y] = true;
+        for(int i = 1; i <= ct; i++) {
+            if(vis[i]) continue;
+            if(slk[i] > vx[x] + vy[i] - w[x][i])
+                slk[i] = vx[x] + vy[i] - w[x][i], pre[i] = y;
+            if(slk[i] < mi) mi = slk[i], ny = i;
+        }
+        for(int i = 0; i <= ct; i++)
+            vis[i] ? vx[lnk[i]] -= mi, vy[i] += mi : slk[i] -= mi;
+    }
+    for(; y; y = pre[y]) lnk[y] = lnk[pre[y]];
 }
-int hungry(int n1,int m1){
-    memset(match,-1,sizeof(match));
-    int ans=0;
-    for(int i=1;i<=n1;i++){
-        memset(check,0,sizeof(check));
-        ans+=dfs(i,m1);
+
+ll km() {
+    for(int i = 1; i <= ct; i++) bfs(i);
+    ll ans = 0;
+    for(int i = 1; i <= ct; i++) ans += vx[i] + vy[i];
+    return ans;
+}
+
+	\end{lstlisting}
+	
+	\begin{lstlisting}
+namespace R {
+    int n; // n为左边点数和右边点数的最大值，点的标号从1开始。
+    int w[N][N], kx[N], ky[N], py[N], vy[N], slk[N], pre[N];
+    ll KM() {
+        fill(kx, kx + n + 1, 0);
+        fill(ky, ky + n + 1, 0);
+        fill(py, py + n + 1, 0);
+        for(int i = 1; i <= n; i++) 
+            for(int j = 1; j <= n; j++)
+                kx[i] = max(kx[i], w[i][j]);
+                
+        for(int i = 1; i <= n; i++) {
+            fill(vy, vy + n + 1, 0);
+            fill(slk, slk + n + 1, INF);
+            fill(pre, pre + n + 1, 0);
+            int k = 0, p = -1;
+            for(py[k = 0] = i; py[k]; k = p) {
+                int d = INF;
+                vy[k] = 1;
+                int x = py[k];
+                for(int j = 1; j <= n; j++)
+                    if (!vy[j]) {
+                        int t = kx[x] + ky[j] - w[x][j];
+                        if (t < slk[j]) { slk[j] = t; pre[j] = k; }
+                        if (slk[j] < d) { d = slk[j]; p = j; }
+                    }
+                for(int j = 0; j <= n; j++)
+                    if (vy[j]) { kx[py[j]] -= d; ky[j] += d; }
+                    else slk[j] -= d;
+            }
+            for (; k; k = pre[k]) py[k] = py[pre[k]];
+        }
+        ll ans = 0;
+        for(int i = 1; i <= n; i++) ans += kx[i] + ky[i];
+        return ans;
     }
-    return ans ;
-} 
+}
 	\end{lstlisting}
 	\section{最大团}
 	一般图的做法就是爆搜+减枝，这是个NPC问题。
@@ -713,10 +879,257 @@ int main() {
     return 0;
 }
 	\end{lstlisting}
+	\section{三元环计数}
+	\begin{lstlisting}
+	auto cmp = [&](int x, int y) {
+	    return deg[x] != deg[y] ? deg[x] > deg[y] : x < y;   
+	}
+	for (int i = 1; i <= m; i++) {
+	    if(cmp(u[i], v[i])) G[u[i]].push_back(v[i]);   
+	    else G[v[i]].push_back(u[i]);
+	}
+	int ans = 0;
+	for (int i = 1; i <= nl i++) {
+	    for (auto u : G[i]) {
+	        vis[u] = i;
+	    }
+	    for (auto u : G[i]) {
+	        for (auto v : G[u]) {
+	            if (vis[v] == i) {
+	                ++ans;
+	            }   
+	        }
+	    }   
+	}
+	
+	\end{lstlisting}
+	\section{带花树算法}
+	用于解决一般图匹配。
+	\begin{lstlisting}
+struct mf {
+    // Time complexity: O(n^3)
+    // 1-based Vertex index
+    // match[x]: vertex matched with x
+    // N: numbers of vertex
+    int vis[N], par[N], orig[N], match[N], aux[N], t, n;
+    vector<int> conn[N];
+    queue<int> Q;
+    void add_edge(int u, int v) {
+        conn[u].push_back(v);
+        conn[v].push_back(u);
+    }
+    void init(int _n) {
+        n = _n;
+        t = 0;
+        for (int i = 0; i <= n; ++i) {
+            conn[i].clear();
+            match[i] = aux[i] = par[i] = 0;
+        }
+    }
+    void augment(int u, int v) {
+        int pv = v, nv;
+        do {
+            pv = par[v];
+            nv = match[pv];
+            match[v] = pv;
+            match[pv] = v;
+            v = nv;
+        } while (u != pv);
+    }
+    int lca(int v, int w) {
+        ++t;
+        while (true) {
+            if (v) {
+                if (aux[v] == t) return v;
+                aux[v] = t;
+                v = orig[par[match[v]]];
+            }
+            swap(v, w);
+        }
+    }
+    void blossom(int v, int w, int a) {
+        while (orig[v] != a) {
+            par[v] = w;
+            w = match[v];
+            if (vis[w] == 1) Q.push(w), vis[w] = 0;
+            orig[v] = orig[w] = a;
+            v = par[w];
+        }
+    }
+    bool bfs(int u) {
+        fill(vis + 1, vis + 1 + n, -1);
+        iota(orig + 1, orig + n + 1, 1);
+        Q = queue<int>();
+        Q.push(u);
+        vis[u] = 0;
+        while (!Q.empty()) {
+            int v = Q.front();
+            Q.pop();
+            for (int x : conn[v]) {
+                if (vis[x] == -1) {
+                    par[x] = v;
+                    vis[x] = 1;
+                    if (!match[x]) return augment(u, x), true;
+                    Q.push(match[x]);
+                    vis[match[x]] = 0;
+                } else if (vis[x] == 0 && orig[v] != orig[x]) {
+                    int a = lca(orig[v], orig[x]);
+                    blossom(x, v, a);
+                    blossom(v, x, a);
+                }
+            }
+        }
+        return false;
+    }
+    int Match() {
+        int ans = 0;
+        // find random matching (not necessary, constant improvement)
+        vector<int> V(n - 1);
+        iota(V.begin(), V.end(), 1);
+        shuffle(V.begin(), V.end(), mt19937(61471));
+        for (auto x : V)
+            if (!match[x]) {
+                for (auto y : conn[x])
+                if (!match[y]) {
+                    match[x] = y, match[y] = x;
+                    ++ans;
+                    break;
+                }
+            }
+        for (int i = 1; i <= n; ++i)
+            if (!match[i] && bfs(i)) ++ans;
+        return ans;
+    }
+} mf;
+	\end{lstlisting}
+	\section{虚树}
+	只提取树上的“关键点”以及某些关键点的lca出来建树，并且不改变他们在原树中dfs序的相对大小关系。
+	如果题目答案只与关键点有关的话，那么这样能很好地帮助我们减小问题的规模来计算答案。
+	\begin{lstlisting}
+int in[N], out[N], T;
+int f[N][20], deep[N];
+vector <int> G[N];
+void dfs(int u, int fa) {
+    in[u] = ++T;
+    deep[u] = deep[fa] + 1;
+    f[u][0] = fa;
+    for(int i = 1; i < 20; i++) {
+        f[u][i] = f[f[u][i - 1]][i - 1];
+    }   
+    for(auto v : G[u]) if(v != fa) {
+        dfs(v, u);
+    }
+    out[u] = T;
+}
+int LCA(int x, int y) {
+    if(deep[x] < deep[y]) swap(x, y);
+    for(int i = 19; i >= 0; i--) {
+        if(deep[f[x][i]] >= deep[y]) x = f[x][i];
+    }  
+    if(x == y) return x;
+    for(int i = 19; i >= 0; i--) {
+        if(f[x][i] != f[y][i]) x = f[x][i], y = f[y][i];  
+    }
+    return f[x][0];
+}
+int dis(int x, int y) {
+    int z = LCA(x, y);
+    return deep[x] + deep[y] - 2 * deep[z];  
+}
+ 
+int V[N << 1], tot;
+vector <int> vt[N];
+void clear() {
+    for(int i = 1; i <= tot; i++) vt[V[i]].clear();  
+}
+int buildVT(vector<int>& nodes) {
+    static int st[N], top;
+    auto cmp = [&](int x, int y) {
+        return in[x] < in[y];
+    };
+    auto chk = [&](int x, int y) {
+        return in[y] >= in[x] && in[y] <= out[x];
+    };
+     
+    tot = 0;
+    for(auto it : nodes) V[++tot] = it;
+    sort(V + 1, V + 1 + tot, cmp);
+    for(int i = 1, tmp = tot; i < tmp; i++) V[++tot] = LCA(V[i], V[i + 1]);
+    sort(V + 1, V + 1 + tot, cmp);
+    tot = unique(V + 1, V + 1 + tot) - V - 1;
+ 
+    st[top = 1] = V[1];
+    for(int i = 2; i <= tot; i++) {
+        while(top > 1 && !chk(st[top], V[i])) --top;
+        vt[st[top]].push_back(V[i]);  
+        st[++top] = V[i];
+    }
+    return V[1];
+}
+	\end{lstlisting}
+	\section{Kruskal重构树}
+	核心思想是将边拆为点当作祖先，那么两个点的lca的点权值就为他们简单路径中经过的边权的最大/最小值。
+	能够将某些树上边权问题转化为点权问题。
+	
+	\begin{lstlisting}
+vector <int> G[N << 1];
+int fa[N << 1], val[N << 1];
+int find (int x) {
+    return fa[x] == x ? fa[x] : fa[x] = find(fa[x]);   
+}
+
+int f[N << 1][20], deep[N << 1], dfn[N << 1], T;
+void dfs(int u, int fa) {
+    dfn[u] = ++T;
+    deep[u] = deep[fa] + 1;
+    f[u][0] = fa;
+    for(int i = 1; i < 20; i++) {
+        f[u][i] = f[f[u][i - 1]][i - 1];
+    }   
+    for(auto v : G[u]) if(v != fa) {
+        dfs(v, u);
+    }
+}
+int LCA(int x, int y) {
+    if(deep[x] < deep[y]) swap(x, y);
+    for(int i = 19; i >= 0; i--) {
+        if(deep[f[x][i]] >= deep[y]) x = f[x][i];
+    }  
+    if(x == y) return x;
+    for(int i = 19; i >= 0; i--) {
+        if(f[x][i] != f[y][i]) x = f[x][i], y = f[y][i];  
+    }
+    return f[x][0];
+}
+
+void Kruskal (vector <pair<int, pii>>& edges) {
+    for (int i = 1; i <= n << 1; i++) {
+        fa[i] = i;   
+    }
+    sort(all(edges), [&] (pair<int, pii> A, pair<int, pii> B) {
+        return A.fi > B.fi;        
+    });
+    int cnt = n;
+    for (int i = 0; i < sz(edges); i++) {
+        int u = edges[i].se.fi, v = edges[i].se.se, w = edges[i].fi;
+        int x = find(u), y = find(v);
+        if (x != y) {
+            val[++cnt] = w;
+            fa[x] = fa[y] = cnt;
+            G[cnt].push_back(x);
+            G[cnt].push_back(y);
+        }
+    }
+    dfs(cnt, 0);   
+}
+
+	\end{lstlisting}
 	\chapter{数学}
 	\section{素数}
 	\subsection{线性筛}
 	线性筛，每个数都只被其最小质因子筛一次，复杂度$O(n)$。
+	
+	也能用来筛积性函数，只需要知道函数的递推关系就行。
 	\begin{lstlisting}
 for(int i = 2; i <= n; i++) {
     if(!chk[i]) {
@@ -729,6 +1142,7 @@ for(int i = 2; i <= n; i++) {
 }
 	\end{lstlisting}
 	\subsection{Miller-Rabin素数测试}
+	用来测试一个数是否为素数。
 	\begin{lstlisting}
 //记得初始化随机种子
 ll mul(ll a, ll b, ll p) {
@@ -782,6 +1196,11 @@ bool Miller_Rabin(ll n) {
 	\subsection{扩展欧几里得}
 	求解$ax+by=c,gcd(a,b)|c$的整数解$x,y$，设$g=gcd(a,b)$，通解为$x=x+k*\frac{b}{g},y=y-k*\frac{a}{g}$，最后的解$x=x*c/g,y=y*c/g$。
 	\begin{lstlisting}
+//扩展欧几里得
+//求解最小正整数解
+//x_0,y_0为方程a'x+b'y=c'的解(除以gcd过后) 
+//x=c'*(x_0+k*b'),y=c'*(y_0-k*a')
+//注意最后要乘上c/gcd 
 void exgcd(ll a, ll b, ll &x, ll &y) {
     if(b == 0) {
         x = 1, y = 0;
@@ -792,6 +1211,17 @@ void exgcd(ll a, ll b, ll &x, ll &y) {
     x = y;
     y = z - y * (a / b);
 } 
+ll calc(ll a, ll b, ll c) {
+    ll x, y;
+    ll g = __gcd(a, b);
+    if(c % g != 0) return -1;
+    a /= g, b /= g, c /= g;
+    exgcd(a, b, x, y);
+    // x *= c 如果在前面乘以c的话可能得到更小的正整数解
+    x = (x % b + b) % b;
+    x *= c; //!!!
+    return x;
+}
 	\end{lstlisting}
 	\subsection{类欧几里得}
 	求解$\sum_{i=0}^n \lfloor\frac{ai+b}{c}\rfloor$。
@@ -831,7 +1261,7 @@ void gao(ll a, ll b, ll c, ll d, ll &x, ll &y) { // a/b < x/y < c/d
 }
 	\end{lstlisting}
 	\section{线性递推求逆元}
-	求$1,\dots,p-1$模$p$的所有逆元，有公式：$inv[i]=(p-p/i)*inv[p\%i]\%m$
+	求$1,\dots,p-1$模$p$的所有逆元，有公式：$inv[i]=(p-p/i)*inv[p\%i]\%p$
 	
 	证明：设$t=\frac{p}{i},k=p\%i$，就有$t*i+k\equiv 0(\% p)$即$t*i\equiv -k(\% p)$，两边同时除以$i*k$就出来了。
 	
@@ -861,7 +1291,42 @@ for(int i = 1 ; i <= n ; i++) {
     now++;
 } 
 	\end{lstlisting}
+	
+	以及浮点数的高斯消元。
+	
+	\begin{lstlisting}
+	// 高斯消元浮点数
+	// a: 系数矩阵 b: 常数列 x: 答案列
+	double x[N];
+	void Gauss(double a[][N], double* b, int n) {
+	    for (int i = 1; i <= n; i++) {
+	        int p = i;
+	        for (int k = i + 1; k <= n; k++) {
+	            if (fabs(a[k][i]) > fabs(a[p][i])) p = k;
+	        }
+	        if (i != p) {
+	            swap(a[i], a[p]), swap(b[i], b[p]);
+	        }
+	        for (int k = i + 1; k <= n; k++) {
+	            double d = a[k][i] / a[i][i];
+	            b[k] -= d * b[i];
+	            for (int j = 1; j <= n; j++) {
+	                a[k][j] -= d * a[i][j];
+	            }
+	        }
+	    }
+	    // 回代 
+	    for (int i = n; i >= 1; i--) {
+	        for (int j = i + 1; j <= n; j++) b[i] -= x[j] * a[i][j];
+	        x[i] = b[i] / a[i][i];
+	    }
+	}
+	\end{lstlisting}
+	
 	\section{欧拉函数}	
+	
+	$\varphi(x)$ 表示 $1..x$ 中与 $x$ 互质的数，如果 $i$ 与 $x$ 互质，那么 $x-i$ 与 $x$ 也互质。
+	
 	$\varphi (x)=x\prod_{i=1}^{n}(1-\frac{1}{p_i})$
 	
 	$\varphi * I = id$
@@ -987,13 +1452,20 @@ ll djs_phi(int n) {
 	
 	最终答案为$S(n,1)+f(1)$。
 	
+	
+	upd：
+	
+	用于解决一类积性函数前缀和的问题，积性函数$F$满足下面条件：
+	* $F$为完全积性函数，且$F(p^c)$易求；；
+	* 对于素数$p$，能够构造完全积性函数使得$f(p)=F(p)$，即在素数位置的取值相同；
+	* $f$函数的前缀和能在$O(1)$快速求解
+	
+	代码以$F(p^k)=p^k(p^k-1)$为例，规定$F$为积性函数。显然$F$满足以上条件，并且$f(p)=p^2-p$，其前缀和也易求。
+	之后将其拆为两部分进行考虑，每个单独算最后相减就行，详见代码：
+	
 	\begin{lstlisting}
-//注意1单独考虑
-//g应为完全积性函数，在质数处与f相等
-#include <bits/stdc++.h>
-using namespace std;
-typedef long long ll;
-const int N = 2e6 + 5, MOD = 1e9 + 7, inv3 = 333333336;
+//min25筛
+//以f(p^k)=p^k(p^k-1)为例 
 ll n;
 ll sum1[N], sum2[N], prime[N];
 ll w[N], ind1[N], ind2[N];
@@ -1005,6 +1477,7 @@ void pre(int n) { //  \sqrt
     for(int i = 1; i <= n; i++) {
         if(!chk[i]) {
             prime[++tot] = i;
+            // 预处理 \sum f(p)，这里只预处理了根号范围内 
             sum1[tot] = (sum1[tot - 1] + i) % MOD;
             sum2[tot] = (sum2[tot - 1] + 1ll * i * i % MOD) % MOD;
         }
@@ -1014,8 +1487,11 @@ void pre(int n) { //  \sqrt
         }
     }
 }
+// 筛得\sum f(p), 求出2~n范围内的素数和，注意要去掉1 
 void calc_g() {
     int z = sqrt(n);
+    // 预处理，首先将质数的取值扩展到所有数，并且建立映射数组，只有O(sqrt(n))个位置有用 
+    // ind数组能对于一个数x，快速找到对应的下标，利用了整除的性质 
     for(ll i = 1, j; i <= n; i = j + 1) {
         j = n / (n / i);
         w[++cnt] = n / i;
@@ -1024,7 +1500,8 @@ void calc_g() {
         g1[cnt] = g1[cnt] * (g1[cnt] + 1) / 2 % MOD - 1;
         if(n / i <= z) ind1[n / i] = cnt;
         else ind2[n / (n / i)] = cnt;
-    }
+    } 
+    // 开始筛法，g[j]-=f(p[i])*(g[k]-sum[i-1]) 
     for(int i = 1; i <= tot; i++) {
         for(int j = 1; j <= cnt && prime[i] * prime[i] <= w[j]; j++) {
             ll tmp = w[j] / prime[i], k;
@@ -1036,11 +1513,15 @@ void calc_g() {
         }
     }
 }
+// 因为F为积性函数，所以先分两种情况：质数和合数进行考虑 
 ll S(ll x, int y) { // 2~x >= P_y
     if(x <= 1 || prime[y] > x) return 0;
     ll z = sqrt(n);
-    ll k = x <= z ? ind1[x] : ind2[n / x];
+    ll k = x <= z ? ind1[x] : ind2[n / x];  
+    // 求这部分的质数答案，可扩展性较高 
     ll ans = (g2[k] - g1[k] + MOD - (sum2[y - 1] - sum1[y - 1]) + MOD) % MOD;
+    // 枚举最小质因子及次方，然后递归求解
+    // ans+=F(p[i]^e) * S(n/p[i],i+1) + F(p[i]^{e+1})
     for(int i = y; i <= tot && prime[i] * prime[i] <= x ; i++) {
         ll pe = prime[i], pe2 = prime[i] * prime[i];
         for(int e = 1; pe2 <= x; ++e, pe = pe2, pe2 *= prime[i]) {
@@ -1049,16 +1530,82 @@ ll S(ll x, int y) { // 2~x >= P_y
     }
     return ans % MOD;
 }
-int main() {
-    cin >> n;
-    int tmp = sqrt(n);
-    pre(tmp);
-    calc_g();
-    cout << (S(n, 1) + 1) % MOD ;
-    return 0;
-}
+	\end{lstlisting}
+	
+	其余示例，求最大质因子不超过$k$的min25筛部分（只需要修改统计质数答案部分即可，本质考察对min25筛和积性函数的理解）：
+	
+	\begin{lstlisting}
+	ll n, k;
+	ll sum1[N], sum2[N], prime[N];
+	ll w[N], ind1[N], ind2[N];
+	ll g1[N], g2[N];
+	bool chk[N];
+	int tot, cnt;
+	void pre(int n) { //  \sqrt
+	    chk[1] = 1;
+	    for(int i = 1; i <= n; i++) {
+	        if(!chk[i]) {
+	            prime[++tot] = i;
+	            sum1[tot] = sum1[tot - 1] + 1;
+	        }
+	        for(int j = 1; j <= tot && prime[j] * i <= n; j++) {
+	            chk[i * prime[j]] = 1;
+	            if(i % prime[j] == 0) break;
+	        }
+	    }
+	}
+	
+	int f(int x, int y) {
+	    return x <= k;
+	}
+	
+	void calc_g(ll n) {
+	    int z = sqrt(n + 0.5);
+	    for(ll i = 1, j; i <= n; i = j + 1) {
+	        j = n / (n / i);
+	        w[++cnt] = n / i;
+	        
+	        g1[cnt] = w[cnt] - 1;
+	
+	        if(n / i <= z) ind1[n / i] = cnt;
+	        else ind2[n / (n / i)] = cnt;
+	    }
+	    for(int i = 1; i <= tot; i++) {
+	        for(int j = 1; j <= cnt && prime[i] * prime[i] <= w[j]; j++) {
+	            ll tmp = w[j] / prime[i], k;
+	            if(tmp <= z) k = ind1[tmp]; else k = ind2[n / tmp];
+	            g1[j] -= (g1[k] - sum1[i - 1]); 
+	        }
+	    }
+	}
+	
+	ll num;
+	
+	ll S(ll x, int y) { // 2~x >= P_y
+	    if(x <= 1 || prime[y] > x) return 0;
+	    int z = sqrt(n + 0.5);
+	    ll ans;
+	    if (k <= x) {
+	        ans = num - sum1[y - 1];
+	    } else {
+	        ll t = (x <= z ? ind1[x] : ind2[n / x]);
+	        ans = g1[t] - sum1[y - 1];
+	    }        
+	    ans = max(ans, 0ll);
+	    ll tmp = ans;
+	    for(int i = y; i <= tot && prime[i] * prime[i] <= x ; i++) {
+	        ll pe = prime[i];
+	        for(int e = 1; pe * prime[i] <= x; ++e, pe = pe * prime[i]) {
+	            ans += f(prime[i], e) * S(x / pe, i + 1) + f(prime[i], e + 1);
+	        }
+	    }
+	    return ans;
+	} 
 	\end{lstlisting}
 	\section{中国剩余定理}
+	一般用于求解一元一次同余方程组的合法解，要求模数为质数。
+	
+	扩展中国剩余定理可以处理模数不互质的情况，这时的大致思想是两两方程列式，通过exgcd来求得合法解，然后不断合并。
 	\begin{lstlisting}
 struct CRT{
     void exgcd(ll a, ll b, ll &g, ll &x, ll &y) {
@@ -1086,7 +1633,57 @@ struct CRT{
 }crt;
 	\end{lstlisting}
 	
-	扩展中国剩余定理可以处理模数不互质的情况，直接类似于数学归纳法合并解即可。
+	\section{Lucas定理}
+	
+	\begin{lstlisting}
+	// lucas定理，用于快速求解大组合数在模意义下的答案
+	
+	// 当模数为质数时，组合数那么可以拆分为十进制下每一位对应组合数的乘积
+	long long Lucas(long long n, long long m, long long p) {
+	  if (m == 0) return 1;
+	  return (C(n % p, m % p, p) * Lucas(n / p, m / p, p)) % p;
+	}
+	
+	// 当模数不为质数时，先将模数拆分为若干个质因子的乘积，然后只考虑组合数在模p^t下的答案，最后通过excrt合并
+	// 之后考虑 n!,m!,(n-m)! 在模 p^t 意义下的答案即可
+	// 以 n! 为例，那么把 p 的倍数单独拿出来，并都提取一个 p 出来，那么后面相当于 (n/p)! 的一个子问题
+	// 前面剩下的则是以 p^t(也可以说是p)为周期的，那么可以O(p^t)预处理后直接计算。
+	// 注意：预处理时不用再把p的倍速给算进去。
+	ll calc(ll n, ll x, ll P) {
+	  if (!n) return 1;
+	  ll s = 1;
+	  for (int i = 1; i <= P; i++)
+	    if (i % x) s = s * i % P;
+	  s = qpow(s, n / P, P);
+	  for (int i = n / P * P + 1; i <= n; i++)
+	    if (i % x) s = s * i % P;
+	  // s：前半部分的结果，忽略x的贡献
+	  return s * calc(n / x, x, P) % P;
+	}
+	ll multilucas(ll m, ll n, ll x, ll P) {
+	  int cnt = 0;
+	  for (int i = m; i; i /= x) cnt += i / x;
+	  for (int i = n; i; i /= x) cnt -= i / x;
+	  for (int i = m - n; i; i /= x) cnt -= i / x;
+	  // 将质因子x的贡献单独拿到外面计算，之后就不考虑x的贡献了
+	  return qpow(x, cnt, P) % P * calc(m, x, P) % P * inverse(calc(n, x, P), P) %
+	         P * inverse(calc(m - n, x, P), P) % P;
+	}
+	ll exlucas(ll m, ll n, ll P) {
+	  int cnt = 0;
+	  ll p[20], a[20];
+	  for (ll i = 2; i * i <= P; i++) {
+	    if (P % i == 0) {
+	      p[++cnt] = 1;
+	      while (P % i == 0) p[cnt] = p[cnt] * i, P /= i;
+	      a[cnt] = multilucas(m, n, i, p[cnt]);
+	    }
+	  }
+	  if (P > 1) p[++cnt] = P, a[cnt] = multilucas(m, n, P, P);
+	  // 中国剩余定理合并得到答案
+	  return CRT(cnt, a, p);
+	}
+	\end{lstlisting}
 	
 	\section{BSGS}
 	求解高次同余方程$a^x\equiv b\mod m$
@@ -1137,6 +1734,67 @@ struct B{
 	若$a^{\frac{p-1}{2}}\equiv -1\mod p$，则$a$为模$p$的非二次剩余。
 	若$a^{\frac{p-1}{2}}\equiv 0\mod p$，则$p|a$。
 	
+	\begin{lstlisting}
+	const int moder = (int) 1e9 + 7;
+	const int inv2 = (moder + 1) / 2;
+	 
+	struct field2{
+	    int x, y, a, p;
+	 
+	    field2():x(0), y(0), a(0), p(0){}
+	    field2(int x, int y, int a, int p):x(x), y(y), a(a), p(p){}
+	 
+	    field2 operator *(const field2 &f)const{
+	        int retx = (1ll * x * f.x + 1ll * y * f.y % p * a) % p;
+	        int rety = (1ll * x * f.y + 1ll * y * f.x) % p;
+	        return field2(retx, rety, a, p);
+	    }
+	 
+	    field2 powermod(int exp)const{
+	        field2 ret(1, 0, a, p), aux = *this;
+	        for ( ; exp > 0; exp >>= 1){
+	            if (exp & 1){
+	                ret = ret * aux;
+	            }
+	            aux = aux * aux;
+	        }
+	        return ret;
+	    }
+	};
+	 
+	int powermod(int a, int exp, int moder){
+	    int ret = 1;
+	    for ( ; exp; exp >>= 1){
+	        if (exp & 1){
+	            ret = 1ll * ret * a % moder;
+	        }
+	        a = 1ll * a * a % moder;
+	    }
+	    return ret;
+	}
+	 
+	int randint(int n){
+	    return rand() % n;
+	}
+	vector <int> remain2(int a, int p){ //x^2 = a (mod p)
+	    if (!a || p == 2){ //特判
+	        return {a, a};
+	    }
+	    if (powermod(a, p - 1 >> 1, p) != 1){ //欧拉准则
+	        return {};
+	    }
+	    while (true){
+	        field2 f(randint(p - 1) + 1, randint(p - 1) + 1, a, p);
+	        f = f.powermod(p - 1 >> 1);
+	        if (f.x){
+	            continue;
+	        }
+	        int ret = powermod(f.y, p - 2, p);
+	        return {ret, p - ret};
+	    }
+	} 
+	
+	\end{lstlisting}
 	\section{欧拉降幂}
 	$$
 	a^b\equiv\left\{
@@ -1169,87 +1827,330 @@ int calc(ll a, ll b, ll m) {
     return qp(a, x, m);
 }
 	\end{lstlisting}
-	\section{FFT}
+
+	\section{多项式全家桶}
+	
+	vector进行封装。
+	
 	\begin{lstlisting}
-const double pi = acos(-1.0);
-struct C{
-    double x, y;
-    C (double xx = 0, double yy = 0) {x = xx, y = yy;}
-}a[N], b[N], c[N];
-C operator + (C a, C b) {return C(a.x + b.x, a.y + b.y);}
-C operator - (C a, C b) {return C(a.x - b.x, a.y - b.y);}
-C operator * (C a, C b) {return C(a.x * b.x - a.y * b.y, a.x * b.y + a.y * b.x);}
-int l, r[N];
-int lim = 1;
-void solve(C *A, int type) {
-    for(int i = 0; i < lim; i++) if(i < r[i]) swap(A[i], A[r[i]]);
-    for(int mid = 1; mid < lim; mid <<= 1) {
-        C Wn(cos(pi / mid), type * sin(pi / mid)) ;
-        for(int R = mid << 1, j = 0; j < lim; j += R) {
-            C w(1, 0);
-            for(int k = 0; k < mid; k++, w = w * Wn) {
-                C x = A[j + k], y = w * A[j + mid + k];
-                A[j + k] = x + y;
-                A[j + mid + k] = x - y;
-            }
-        }
-    }
-}
-void FFT(C *a, C *b) {
-    while(lim <= n + m) lim <<= 1, l++;
-    for(int i = 0; i < lim; i++) {
-        r[i] = (r[i >> 1] >> 1) | ((i & 1) << (l - 1));
-    }
-    for(int i = n + 1; i < lim; i++) a[i] = C();
-    for(int i = m + 1; i < lim; i++) b[i] = C();
-    solve(a, 1); solve(b, 1);
-    for(int i = 0; i <= lim; i++) c[i] = a[i] * b[i];
-    solve(c, -1);
-    for(int i = 0; i <= n + m; i++) c[i].x = (c[i].x / lim + 0.5);
-}
+	#include <bits/stdc++.h>
+	using namespace std;
+	typedef long long ll;
+	typedef vector <int> Poly;
+	#define ri register int
+	#define cs const
+	#define sz(a) (a).size()
+	#define all(a) (a).begin(), (a).end()
+	const int MOD = 998244353, inv2 = (MOD + 1) >> 1;
+	const int N = 4e5 + 5, M = (1 << 19); //四倍空间,M=2^x且M>=N
+	typedef vector <int> Poly;
+	#define ri register int
+	#define cs const
+	inline int add(int a, int b) {return a + b >= MOD ? a + b - MOD : a + b;}
+	inline int dec(int a, int b) {return a < b ? a - b + MOD : a - b;}
+	inline int mul(int a, int b) {return 1ll * a * b % MOD;}
+	inline int qpow(int a, int b) {int res = 1; while(b) {if(b & 1) res = mul(res, a); a = mul(a, a); b >>= 1;} return res;}
+	int rev[N], inv[N], pw[M], W[2][M];
+	inline void init() {
+	    inv[0] = inv[1] = 1;
+	    for(ri i = 2; i < N; i++) inv[i] = mul(inv[MOD % i], MOD - MOD / i);
+	    int w0 = qpow(3, (MOD - 1) / M), w1 = qpow((MOD + 1) / 3, (MOD - 1) / M);
+	    W[0][0] = W[1][0] = 1;
+	    for(ri i = 1; i < M; i++) {
+	        W[0][i] = mul(W[0][i - 1], w0);
+	        W[1][i] = mul(W[1][i - 1], w1);
+	    }
+	}      
+	inline void init_rev(int len) {
+	    for(ri i = 0; i < len; i++) rev[i] = rev[i >> 1] >> 1 | ((i & 1) * (len >> 1));   
+	}
+	inline void NTT(Poly &a, int n, int op) {
+	    for(ri i = 0; i < n; i++) if(i < rev[i]) swap(a[i], a[rev[i]]);
+	    for(ri i = 1; i < n; i <<= 1) {
+	        int t = M / (i << 1), t2 = (op == -1 ? 1 : 0);
+	        for(ri j = 0; j < i; ++j) pw[j] = W[t2][j * t];
+	        int wn = (op == -1 ? W[1][i] : W[0][i]);
+	        for(ri j = 0; j < n; j += (i << 1)) {
+	            for(ri k = 0, x, y; k < i; ++k) {
+	                x = a[j + k], y = mul(pw[k], a[j + k + i]);
+	                a[j + k] = add(x, y);
+	                a[j + k + i] = dec(x, y);
+	            }   
+	        }
+	    }   
+	    if(op == -1) for(ri i = 0; i < n; i++) a[i] = mul(a[i], inv[n]);
+	}
+	 
+	struct cn{
+	    int x, y, w;
+	    cn operator * (cn a){
+	        cn ans;
+	        ans.x = (1ll * x * a.x % MOD + 1ll * y * a.y % MOD * w % MOD) % MOD;
+	        ans.y = (1ll * x * a.y % MOD + 1ll * y * a.x % MOD) % MOD;
+	        ans.w = w;
+	        return ans;
+	    }
+	    int operator ^ (int b){
+	        cn ans, x = *this;
+	        ans.x = 1, ans.y = 0, ans.w = w;
+	        while(b) {
+	            if(b & 1) ans = ans * x;
+	            x = x * x;
+	            b >>= 1;
+	        }
+	        return ans.x;
+	    }
+	};
+	//求解n的二次剩余
+	int sqrt_mod(int n) {
+	    if(n == 0) return 0;
+	    if(qpow(n, (MOD - 1) / 2) == MOD - 1) return -1;
+	    int a, w;
+	    while(true) {
+	        a = rand() % MOD;
+	        w = (1ll * a * a - n + MOD) % MOD;
+	        if(qpow(w, (MOD - 1) / 2) == MOD - 1) break;
+	    }
+	    cn x;
+	    x.x = a, x.y = 1, x.w = w;
+	    return x ^ ((MOD + 1) / 2);
+	}
+	inline print(cs Poly &a) {
+	    for(ri i = 0; i < sz(a); i++) cout << a[i] << ' ';
+	    cout << '\n';   
+	}
+	 
+	inline Poly operator + (cs Poly &a, cs Poly &b) {
+	    Poly c = a; c.resize(max(sz(a), sz(b)));
+	    for(ri i = 0; i < sz(b); i++) c[i] = add(c[i], b[i]);
+	    return c;   
+	}
+	inline Poly operator - (cs Poly &a, cs Poly &b) {
+	    Poly c = a; c.resize(max(sz(a), sz(b)));
+	    for(ri i = 0; i < sz(b); i++) c[i] = dec(c[i], b[i]);
+	    return c;   
+	}
+	inline Poly operator * (Poly a, Poly b) {
+	    int n = sz(a), m = sz(b), l = 1;
+	    while(l < n + m - 1) l <<= 1;
+	    init_rev(l);
+	    a.resize(l), NTT(a, l, 1);
+	    b.resize(l), NTT(b, l, 1);
+	    for(ri i = 0; i < l; i++) a[i] = mul(a[i], b[i]);
+	    NTT(a, l, -1);
+	    a.resize(n + m - 1);
+	    return a;
+	}
+	inline Poly operator * (Poly a, int b) {
+	    for(ri i = 0; i < sz(a); i++) a[i] = mul(a[i], b);
+	    return a;   
+	}
+	 
+	//求导
+	inline Poly Deriv(Poly a) {
+	    for(ri i = 0; i + 1 < sz(a); i++) a[i] = mul(a[i + 1], i + 1);
+	    a.pop_back();
+	    return a;   
+	}
+	 
+	//积分
+	inline Poly Integ(Poly a) {
+	    a.push_back(0);
+	    for(ri i = sz(a) - 1; i; i--) a[i] = mul(a[i - 1], inv[i]);
+	    a[0] = 0;
+	    return a;   
+	}
+	 
+	//多项式取逆
+	inline Poly Inv(cs Poly &a, int lim) {
+	    Poly c, b(1, qpow(a[0], MOD - 2));
+	    for(ri l = 4; (l >> 2) < lim; l <<= 1) {
+	        init_rev(l);
+	        c = a, c.resize(l >> 1);
+	        c.resize(l), NTT(c, l, 1);
+	        b.resize(l), NTT(b, l, 1);
+	        for(ri i = 0; i < l; i++) b[i] = mul(b[i], dec(2, mul(c[i], b[i])));
+	        NTT(b, l, -1);
+	        b.resize(l >> 1);
+	    }
+	    b.resize(lim);
+	    return b;      
+	}
+	inline Poly Inv(cs Poly &a) {return Inv(a, sz(a));}
+	 
+	//多项式开根
+	inline Poly Sqrt(cs Poly &a, int lim) {
+	    Poly c, d, b(1, sqrt_mod(a[0]));
+	    for(ri l = 4; (l >> 2) < lim; l <<= 1) {
+	        init_rev(l);
+	        c = a, c.resize(l >> 1);
+	        d = Inv(b, l >> 1);
+	        c.resize(l), NTT(c, l, 1);
+	        d.resize(l), NTT(d, l, 1);
+	        for(ri j = 0; j < l; j++) c[j] = mul(c[j], d[j]);
+	        NTT(c, l, -1);
+	        b.resize(l >> 1);
+	        for(ri j = 0; j < (l >> 1); j++) b[j] = mul(add(c[j], b[j]), inv2);
+	    }
+	    b.resize(lim);
+	    return b;   
+	};
+	inline Poly Sqrt(cs Poly &a) {return Sqrt(a, sz(a));}
+	 
+	//多项式ln
+	inline Poly Ln(Poly a, int lim){
+	    a = Integ(Deriv(a) * Inv(a, lim));
+	    a.resize(lim);
+	    return a;
+	}
+	inline Poly Ln(cs Poly &a) {return Ln(a, sz(a));}
+	 
+	//多项式exp
+	inline Poly Exp(cs Poly &a, int lim){
+	    Poly c, b(1, 1);
+	    for(ri i = 2; (i >> 1) < lim; i <<= 1) {
+	        c = Ln(b, i);
+	        for(ri j = 0; j < i; j++) c[j] = dec(j < sz(a) ? a[j] : 0, c[j]);
+	        c[0] = add(c[0], 1);
+	        b = b * c;
+	        b.resize(i);
+	    }
+	    b.resize(lim);
+	    return b;
+	}
+	inline Poly Exp(cs Poly &a) {return Exp(a, sz(a));}
+	 
+	//三角函数
+	cs int w4 = qpow(3, (MOD - 1) / 4);
+	inline Poly Cos(cs Poly &a, int lim) {
+	    Poly c = a; c.resize(lim);
+	    c = (Exp(c * w4) + Exp(c * (MOD - w4))) * inv2;
+	    return c;
+	}
+	inline Poly Cos(cs Poly &a) {return Cos(a, sz(a));}
+	inline Poly Sin(cs Poly &a, int lim){
+	    Poly c = a; c.resize(lim);
+	    c = (Exp(c * w4) - Exp(c * (MOD - w4))) * mul(inv2, qpow(w4, MOD - 2));
+	    return c;
+	}
+	inline Poly Sin(cs Poly &a) {return Sin(a, sz(a));}
+	 
+	//多项式除法
+	inline Poly operator / (Poly a, Poly b) {
+	    ri len = 1, deg = sz(a) - sz(b) + 1;
+	    reverse(all(a)), reverse(all(b));
+	    while(len <= deg) len <<= 1;
+	    b = Inv(b, len), b.resize(deg);
+	    a = a * b, a.resize(deg);
+	    reverse(all(a));
+	    return a;
+	}
+	inline Poly operator % (const Poly &a, const Poly &b) {
+	    Poly c = a - (a / b) * b;
+	    c.resize(sz(b) - 1);
+	    return c;
+	}
+	 
+	//多项式k次方
+	inline Poly Ksm(Poly a, int k, int lim){
+	    a = Exp(Ln(a) * k);
+	    a.resize(lim);
+	    return a;
+	}
+	inline Poly Ksm(Poly &a, int k) {
+	    int t, x;
+	    for(ri i = 0; i < sz(a); i++) if(a[i] > 0) {
+	        t = a[i], x = i; break;   
+	    }
+	    if(t == 1 && x == 0) return Ksm(a, k, sz(a));
+	    Poly b(x + 1, 0); b[x] = t;
+	    a = a / b;
+	    a = Ksm(a, k, sz(a));
+	    a.resize(sz(a) + x * k);
+	    for(int i = sz(a) - 1; i >= 0; i--) {
+	        if(i - x * k < 0) a[i] = 0;
+	        else a[i] = a[i - x * k];
+	    }
+	    a = a * qpow(t, k);
+	    return a;
+	}
+	 
+	//分治FFT
+	//f_i=\sum_{j=0}^{i-1}f_j*g_{i-j},f[0]=1
+	void DC_FFT(int l, int r, Poly &f, const Poly &g) {
+	    if(l >= r) return;
+	    int mid = (l + r) >> 1;
+	    DC_FFT(l, mid, f, g);
+	    Poly a(r - l), b(r - l);
+	    Poly c = f;
+	    for(int i = mid + 1; i <= r; i++) c[i] = 0;
+	    for(int i = 0; i < r - l; i++) a[i] = c[i + l], b[i] = g[i + 1];
+	    c = a * b;
+	    for(int i = mid + 1; i <= r; i++) f[i] = (f[i] + c[i - l - 1]) % MOD;
+	    DC_FFT(mid + 1, r, f, g);
+	}
+	 
+	//多点求值
+	//已知a[i],f，求解b[i] = f(a[i])
+	Poly P[N];
+	void DC_NTT(int o, int l, int r, const Poly& a) {
+	    if(l == r) {
+	        P[o].resize(2);
+	        P[o][0] = MOD - a[l], P[o][1] = 1;
+	        return;
+	    }
+	    int mid = (l + r) >> 1;
+	    DC_NTT(o << 1, l, mid, a), DC_NTT(o << 1|1, mid + 1, r, a);
+	    P[o] = P[o << 1] * P[o << 1|1];
+	}
+	void DC_MOD(const Poly &f, const Poly &a, Poly &b, int o, int l, int r) {
+	    if(r - l <= 400) {
+	        for(int i = l; i <= r; i++) {
+	            int res = 0;
+	            for(int j = sz(f) - 1; j >= 0; j--) res = add(mul(res, a[i]), f[j]);
+	            b[i] = res;
+	        }   
+	        return;
+	    }
+	    int mid = (l + r) >> 1;
+	    Poly lf = f, rf = f;
+	    if(sz(lf) >= sz(P[o << 1])) lf = lf % P[o << 1];
+	    if(sz(rf) >= sz(P[o << 1|1])) rf = rf % P[o << 1|1];
+	    DC_MOD(lf, a, b, o << 1, l, mid), DC_MOD(rf, a, b, o << 1|1, mid + 1, r);
+	}
+	void getval(const Poly &f, const Poly &a, Poly &b) {
+	    DC_NTT(1, 0, sz(a) - 1, a);//插值时省略避免重复运算
+	    DC_MOD(f, a, b, 1, 0, sz(a) - 1);
+	}
+	 
+	//多项式快速插值
+	//已知点对(x_i,y_i)，求解插值多项式
+	inline Poly DC_NTT2(int o, int l, int r, const Poly& v) {
+	    if(r == l) {
+	        Poly t(1, v[l]);
+	        return t;
+	    }
+	    int mid = (l + r) >> 1;
+	    Poly lf = DC_NTT2(o << 1, l, mid, v), rf = DC_NTT2(o << 1|1, mid + 1, r, v);
+	    return lf * P[o << 1|1] + rf * P[o << 1];
+	}
+	 
+	inline Poly fast_interpolation(const Poly &x, const Poly &y) {
+	    int n = sz(x);
+	    DC_NTT(1, 0, n - 1, x);
+	    Poly M = P[1], val(n);
+	    M = Deriv(M);
+	    getval(M, x, val);
+	    for(ri i = 0; i < n; i++) val[i] = mul(y[i], qpow(val[i], MOD - 2));
+	    return DC_NTT2(1, 0, n - 1, val);
+	}
+	 
+	int main() {
+	    init(); //记住要init
+	    return 0;   
+	}
 	\end{lstlisting}
-	\section{NTT}
-	有模数版FFT，模数一般为998244353。
-	\begin{lstlisting}
-const int N = 4e5 + 5, M = 2e6 + 5, P = 998244353, G = 3, Gi = 332748118;
-int n, m, lim = 1, L, r[N];
-ll a[N], b[N];
-ll qp(ll a, ll k) {
-    ll ans = 1;
-    while(k) {
-        if(k & 1) ans = (ans * a ) % P;
-        a = (a * a) % P;
-        k >>= 1;
-    }
-    return ans;
-}
-void NTT(ll *A, int type) {
-    for(int i = 0; i < lim; i++)
-        if(i < r[i]) swap(A[i], A[r[i]]);
-    for(int mid = 1; mid < lim; mid <<= 1) {
-        ll Wn = qp( type == 1 ? G : Gi , (P - 1) / (mid << 1)); //Wn = g ^ ((p - 1) / n)  (mod p)
-        for(int j = 0; j < lim; j += (mid << 1)) {
-            ll w = 1;
-            for(int k = 0; k < mid; k++, w = (w * Wn) % P) {
-                 int x = A[j + k], y = w * A[j + k + mid] % P;
-                 A[j + k] = (x + y) % P,
-                 A[j + k + mid] = (x - y + P) % P;
-            }
-        }
-    }
-}
-void solve(ll *a, ll *b) {
-    while(lim <= n + m) lim <<= 1, L++;
-    for(int i = 0; i < lim; i++) r[i] = (r[i >> 1] >> 1) | ((i & 1) << (L - 1));
-    for(int i = n + 1; i < lim; i++) a[i] = 0;  //a,b need init
-    for(int i = m + 1; i < lim; i++) b[i] = 0;
-    NTT(a, 1); NTT(b, 1);
-    for(int i = 0; i < lim; i++) a[i] = (a[i] * b[i]) % P;
-    NTT(a, -1);
-    ll inv = qp(lim, P - 2);
-    for(int i = 0; i < lim; i++) a[i] = a[i] * inv % P;
-}
-	\end{lstlisting}
+
 	\section{蔡勒公式}
 	快速判断一天为星期几。
 	\begin{lstlisting}
@@ -1297,77 +2198,12 @@ int work(ll P) {   //p - 1
     }
 } 
 	\end{lstlisting}
-	\section{二次剩余}
-	\begin{lstlisting}
-//求解x^2=n(mod p)
-const int moder = (int) 1e9 + 7;
-const int inv2 = (moder + 1) / 2;
- 
-struct field2{
-    int x, y, a, p;
- 
-    field2():x(0), y(0), a(0), p(0){}
-    field2(int x, int y, int a, int p):x(x), y(y), a(a), p(p){}
- 
-    field2 operator *(const field2 &f)const{
-        int retx = (1ll * x * f.x + 1ll * y * f.y % p * a) % p;
-        int rety = (1ll * x * f.y + 1ll * y * f.x) % p;
-        return field2(retx, rety, a, p);
-    }
- 
-    field2 powermod(int exp)const{
-        field2 ret(1, 0, a, p), aux = *this;
-        for ( ; exp > 0; exp >>= 1){
-            if (exp & 1){
-                ret = ret * aux;
-            }
-            aux = aux * aux;
-        }
-        return ret;
-    }
-};
- 
-int powermod(int a, int exp, int moder){
-    int ret = 1;
-    for ( ; exp; exp >>= 1){
-        if (exp & 1){
-            ret = 1ll * ret * a % moder;
-        }
-        a = 1ll * a * a % moder;
-    }
-    return ret;
-}
- 
-int randint(int n){
-    return rand() % n;
-}
-vector <int> remain2(int a, int p){ //x^2 = a (mod p)
-    if (!a || p == 2){ //特判 
-        return {a, a};
-    }
-    if (powermod(a, p - 1 >> 1, p) != 1){ //欧拉准则 
-        return {};
-    }
-    while (true){
-        field2 f(randint(p - 1) + 1, randint(p - 1) + 1, a, p);
-        f = f.powermod(p - 1 >> 1);
-        if (f.x){
-            continue;
-        }
-        int ret = powermod(f.y, p - 2, p);
-        return {ret, p - ret};
-    }
-} 
-	\end{lstlisting}
+
 	\section{拉格朗日插值}
 	对于一个$n$次多项式，如果已知其$n+1$项，那么就可以快速求解其他项，若那$n+1$项连续，则可以通过预处理阶乘，复杂度达到$O(n)$。
 	
 	常见应用就为求解$\sum_{i=1}^{n}i^k$，这是一个以$n$为自变量的$k+1$次多项式，应用拉格朗日插值复杂度为$O(k)$。
 
-	\begin{figure}[!htb]
-		\centering
-		\includegraphics[width=0.9\textwidth]{chafen}    % 当前tex文件同一目录下名为icpc的任意格式图片
-	\end{figure}
 
 	\begin{lstlisting}
 struct Lagrange {
@@ -1407,6 +2243,46 @@ struct Lagrange {
 	}
 }lagrange;
 	\end{lstlisting}
+	
+	\section{拉格朗日求系数}
+	\begin{lstlisting}
+	//拉格朗日求d次多项式系数，a[i]为系数 
+	ll qpow(ll a, ll b) {
+	    ll ans = 1;
+	    while(b) {
+	        if(b & 1) ans = ans * a % MOD;
+	        a = a * a % MOD;
+	        b >>= 1;   
+	    }
+	    return ans;   
+	}
+	struct Lagrange {
+	    ll f[N], a[N], b[N];
+	    int d;
+	    void init(int _d) {
+	        d = _d;
+	        //y_i
+	        for(int i = 1; i <= d + 1; i++) f[i] = (f[i - 1] + qpow(i, d - 1)) % MOD; 
+	        b[0] = 1;
+	    }
+	    void work() {
+	        for(int i = 0; i <= d; i++) {
+	            for(int j = i + 1; j; j--) b[j] = (b[j - 1] + MOD - 1ll * b[j] * (i + 1) % MOD) % MOD;
+	            b[0] = 1ll * b[0] * (MOD - i - 1) % MOD;
+	        }
+	        for(int i = 0; i <= d; i++) {
+	            int s = f[i + 1], inv = qpow(i + 1, MOD - 2);
+	            for(int j = 0; j <= d; j++) if(i != j) s = 1ll * s * qpow((i - j + MOD) % MOD, MOD - 2) % MOD;
+	            b[0] = 1ll * b[0] * (MOD - inv) % MOD;
+	            for(int j = 1; j <= d + 1; j++) b[j] = (MOD - 1ll * (b[j] + MOD - b[j - 1]) * inv % MOD) % MOD;
+	            for(int j = 0; j <= d + 1; j++) a[j] = (a[j] + 1ll * s * b[j]) % MOD;
+	            for(int j = d + 1; j; j--) b[j] = (b[j - 1] + MOD - 1ll * b[j] * (i + 1) % MOD) % MOD;
+	            b[0] = 1ll * b[0] * (MOD - i - 1) % MOD;
+	        }   
+	    }
+	}A;
+	\end{lstlisting}
+	
 	\section{BM线性递推}
 	若递推式由前$k$项推出，我们只需要求出前$2k$项，然后传入就行，能够快速求解第$n$项，复杂度为$O(klogn)$。
 	\begin{lstlisting}
@@ -1524,6 +2400,107 @@ int main() {
 }
 	\end{lstlisting}
 	
+	\section{快速gcd}
+	预处理gcd。
+	\begin{lstlisting}
+	for (int i = 1; i <= a; i++) {
+	    for (int j = 1; j <= b; j++) {
+	        if (!Gcd[i][j]) {
+	            for (int k = 1; k * i <= a && k * j <= b; k++)
+	                Gcd[k * i][k * j] = k, Lcm[k * i][k * j] = i * j * k;
+	        }
+	    }
+	}
+	\end{lstlisting}
+	
+	\section{卡特兰数}
+	
+	注意通过网格中非降路径来证明的方法，应用很多，包括最简单的出入栈，以及多边形的三角划分、$n$个结点的二叉树个数、圆上不相交的线段数等。
+	
+	前面几项为：1，1，2，5，14，42，132，429
+	
+	\begin{lstlisting}
+	//卡特兰数递推式：cat[i]=cat[i-1]*(4i-2)/(i+1)
+	//通项：cat[n]=C(2n,n)/(n+1) 
+	int inv[N], cat[N];
+	void init(int n) {
+	    inv[0] = inv[1] = 1;
+	    for (int i = 2; i <= n + 1; i++) {
+	        inv[i] = 1ll * inv[MOD % i] * (MOD - MOD / i) % MOD;
+	    }
+	    cat[0] = cat[1] = 1;
+	    for (int i = 2; i <= n; i++) {
+	        cat[i] = 1ll * cat[i - 1] * (4 * i - 2) % MOD * inv[i + 1] % MOD;
+	    }
+	} 
+	\end{lstlisting}
+	
+	\section{FMT}
+	
+	FMT:快速莫比乌斯变换，即$\displaystyle \hat{f(S)}=\sum_{s\subset S}f(s)$
+	
+	这样可以快速求$\displaystyle h(S)=\sum_{L\subset S,R\subset S}[L\cup R=S]f(L)*g(R)$，只需要通过FMT变化过后，直接乘起来，再IFMT变换回去即可。类似于FWT的思想。
+	
+	\begin{lstlisting}
+	// 快速莫比乌斯变化,即f变为f的子集和
+	// 之后f'*g'再通过逆变化回去就是子集并的卷积
+	void FMT(int *f, int n, int opt) {
+	    for (int j = 0; j < n; ++j)
+	        for (int i = 0; i < (1 << n); ++i) if (i >> j & 1)
+	            f[i] += opt * f[i ^ (1 << j)];
+	}
+	\end{lstlisting}
+	
+	\section{子集卷积}
+	子集卷积要解决$\displaystyle h(S)=\sum_{T\subset S}f(T)*g(S-T)$，比[[FMT|卷积并]]要求更严，要求两个集合交集为空。
+	
+	实际上可以借助于[[FMT]]。通过FMT过后，我们只需要再加一维状态表示二进制中$1$的个数，那么$f[|s|][s]$才是真实合法的状态（其余状态是假的状态，并没有什么用），然后直接做卷积即可。原理在于如果两个集合相交为空集，那么$|S|+|T|=|S\cup T|$，后者直接卷积并来搞。
+	
+	时间复杂度为$O(n^22^n)$。
+	
+	模板如下：
+	
+	\begin{lstlisting}
+	// 子集卷积，计算 h(S)=\sum_{s\in S,t=S-s}f(s)*g(t)
+	// 通过集合并卷积(FMT)记录二进制中1的个数得到，时间复杂度为O(n^2 * 2^n)
+	const int Len = 1 << 21, Base = 21;
+	
+	int add(int x, int y) {return x + y >= MOD ? x + y - MOD : x + y;}
+	int dec(int x, int y) {return x - y < 0 ? x - y + MOD : x - y;}
+	int mul(int x, int y) {return 1ll * x * y % MOD;}
+	
+	inline void fmt_or(vector<int>& A, int dmt = 1, int base = Base) {
+	    int len = 1 << base;
+	    for (int i = 1; i < len; i <<= 1)
+	        for (int j = 0, t = i << 1; j < len; j += t)
+	            for (int k = j, K = j + i; k < K; ++k) 
+	                A[k + i] = (dmt > 0 ? add(A[k + i], A[k]) : dec(A[k + i], A[k]));
+	}
+	
+	// 计算二进制中1的个数
+	vector<int> pc;
+	void get_top(int sz) {
+	    pc.resize(sz, 0);
+	    for (int i = 1; i < sz; ++i) pc[i] = pc[i >> 1] + (i & 1);
+	}
+	
+	vector<int> subset_conv(const vector<int>& A, const vector<int>& B, int base) {
+	    int len = 1 << base;
+	    vector<int> H(len);
+	    vector<vector<int> > siga(base + 1, vector<int>(len, 0)), sigb = siga, sigh = siga;
+	    for (int S = 0; S < len; ++S) siga[pc[S]][S] = A[S], sigb[pc[S]][S] = B[S]; //初始化
+	    for (int i = 0; i <= base; ++i) {
+	        fmt_or(siga[i], 1, base);
+	        fmt_or(sigb[i], 1, base);
+	        for (int S = 0; S < len; ++S)
+	            for (int j = 0; j <= i; ++j) sigh[i][S] = add(sigh[i][S], mul(siga[j][S], sigb[i - j][S]));
+	        fmt_or(sigh[i], -1, base);
+	    }
+	    for (int S = 0; S < len; ++S) H[S] = sigh[pc[S]][S]; // 将真实答案赋值
+	    return H;
+	}
+	\end{lstlisting}
+	
 	\chapter{字符串}
 	\section{KMP}
 	\begin{lstlisting}
@@ -1627,6 +2604,82 @@ struct Trie{
     }
 }t1, t2;
 	\end{lstlisting}
+	
+	01trie一般也比较常用，是用来维护二进制相关信息的，可以用来求异或最大值。
+	
+	01trie是只有两个儿子的trie树，一般用于各种与二进制有关的问题中，比如异或最大、维护异或值等。
+	
+	01trie维护异或值十分方便，并且支持全局+1操作，即一颗字典树上所有的值都+1；并且01trie还可以很方便地合并结点。
+	
+	下面给出一道例题的代码，用到了全局+1以及trie树合并等操作，注意代码里面是动态开点不然空间存不下：
+	
+	\begin{lstlisting}
+	//维护异或和
+	void pushup(int o) {
+	    w[o] = w[ls] + w[rs];
+	    sum[o] = 0;
+	    if (ls) sum[o] = (sum[ls] << 1);
+	    if (rs) sum[o] ^= ((sum[rs] << 1) | (w[rs] & 1));
+	}
+	
+	void insert(int& o, int v, int d, int op) {
+	    if (!o) o = ++tot;
+	    if (d == MAXH) {
+	        w[o] += op;
+	        return;
+	    }
+	    insert(ch[o][v & 1], v >> 1, d + 1, op);
+	    pushup(o);
+	}
+	// 全局+1操作，本质是交换左右两个儿子
+	void add(int o) {
+	    swap(ls, rs);
+	    if (ls) add(ls);
+	    pushup(o);
+	}
+	//字典树合并
+	int merge(int x, int y) {
+	    if (!x) return y;
+	    if (!y) return x;
+	    w[x] += w[y];
+	    sum[x] ^= sum[y];
+	    ch[x][0] = merge(ch[x][0], ch[y][0]);
+	    ch[x][1] = merge(ch[x][1], ch[y][1]);
+	    return x;
+	}
+	
+	ll ans;
+	
+	void dfs(int u) {
+	    int sons = 0;
+	    for (auto v : G[u]) {
+	        dfs(v);
+	        add(rt[v]);
+	        if (++sons > 1) {
+	            rt[u] = merge(rt[u], rt[v]);
+	        } else {
+	            rt[u] = rt[v];
+	        }
+	    }
+	    insert(rt[u], a[u], 0, 1);
+	    ans += sum[rt[u]];
+	}
+	
+	void run() {
+	    cin >> n;
+	    for (int i = 1; i <= n; i++) {
+	        cin >> a[i];
+	    }
+	    for (int i = 2; i <= n; i++) {
+	        int f; 
+	        cin >> f;
+	        G[f].push_back(i);
+	    }
+	    dfs(1);
+	    cout << ans << '\n';
+	}
+	\end{lstlisting}
+	
 	\section{AC自动机}
 	\begin{lstlisting}
 queue <int> q;
@@ -1878,6 +2931,119 @@ int main() {
     return 0;
 }
 	\end{lstlisting}
+	
+	\section{广义后缀自动机}
+	
+	\begin{lstlisting}
+	//广义后缀自动机，分在线和离线两种算法
+	//离线需要先构造出trie树，之后直接在trie树上bfs添加结点即可，一般比较麻烦，必须建出显式trie树
+	//在线算法直接插入即可，注意1：需要调整last，从last开始插入；注意2：要加上SAM中被注释的部分，这就是普通sam和广义sam的区别
+	//N:结点个数，M:字符集大小，sam需要乘以一个2
+	//其它操作和普通sam类似
+	struct SAM {
+	    const static int MAXNODE = N * M * 2;
+	    const static int M = 10;  //
+	    int go[MAXNODE][M], link[MAXNODE], len[MAXNODE];
+	    int last, sz, root;
+	
+	    int newnode() {
+	        ++sz;
+	        memset(go[sz], 0, sizeof(go[sz]));
+	        return sz;
+	    }
+	
+	    void init() {
+	        sz = 0;
+	        root = last = newnode();
+	        len[root] = link[root] = 0;
+	    }
+	
+	    int split(int p, int q, int ch) {
+	        int clone = newnode();
+	        memcpy(go[clone], go[q], sizeof(go[q]));
+	        link[clone] = link[q];
+	        link[q] = clone;
+	        len[clone] = len[p] + 1;
+	        for (int i = p; i && go[i][ch] == q; i = link[i]) {
+	            go[i][ch] = clone;
+	        }
+	        return clone;
+	    }
+	
+	    void insert(int ch) {
+	        // if (go[last][ch]) {
+	        //     int q = go[last][ch];
+	        //     last = len[last] + 1 == len[q] ? q : split(last, q, ch);
+	        //     return;
+	        // }
+	        // ----
+	        int cur = newnode();
+	        len[cur] = len[last] + 1;
+	        int p = last;
+	        for (; p && !go[p][ch]; p = link[p]) {
+	            go[p][ch] = cur;
+	        }
+	        if (!p) {
+	            link[cur] = root;
+	        } else {
+	            int q = go[p][ch];
+	            link[cur] = len[p] + 1 == len[q] ? q : split(p, q, ch);
+	        }
+	        last = cur;
+	    }
+	
+	    ll solve() {
+	        ll ans = 0;
+	        for (int i = root + 1; i <= sz; ++i) {
+	           ans += len[i] - len[link[i]];
+	        }
+	        return ans;
+	    }
+	}sam;
+	int sam_id[N * M];
+	struct Trie {
+	    int ch[N * M][M];
+	    int root, cnt, last;
+	
+	    int newnode() {
+	        memset(ch[++cnt], 0, sizeof(ch[cnt]));
+	        return cnt;
+	    }
+	
+	    void init() {
+	        cnt = 0;
+	        root = newnode();
+	    }
+	
+	    int insert(int last, int x) {
+	        if (!ch[last][x]) {
+	            ch[last][x] = newnode();
+	        }
+	        return ch[last][x];
+	    }
+	
+	    void bfs() {
+	        int p = root;
+	        sam.init();
+	        sam_id[root] = sam.root;
+	        queue <int> q;
+	        q.push(p);
+	        while (!q.empty()) {
+	            int u = q.front(); 
+	            q.pop();
+	            for (int i = 0; i < M; i++) {
+	                if (ch[u][i]) {
+	                    sam.last = sam_id[u];
+	                    sam.insert(i);
+	                    sam_id[ch[u][i]] = sam.last;
+	                    q.push(ch[u][i]);
+	                }
+	            }
+	        }
+	    }
+	}trie;
+	\end{lstlisting}
+	
 	\section{最小表示法}
 	\begin{lstlisting}
 int getmin(char *s){
@@ -1896,9 +3062,70 @@ int getmin(char *s){
     return i<j?i:j;
 } 
 	\end{lstlisting}
+	
+	\section{lydon分解}
+	\begin{lstlisting}
+	//lydon分解的duval算法
+	//lydon串本质是当前串就为最小这个串的最小表示法，所以lydon分解就是将整个串划分为若干个最小表示法的串，并且这种划分具有唯一性。
+	//lydon分解：将串$s$分解为若干个lydon串$s_1,s_2,\cdots,s_k$，并且满足$s_1>=s_2>=...>=s_k$。
+	//duval算法核心思想就是通过两个指针来操作，然后根据大小关系来进行指针移位。
+	//若$k$指针移到$i$，说明找到了一个lydon串，然后开启一个新的循环；否则就说明继续跑循环节或者lydon串已经截止。
+	vector<string> duval(string const& s) {
+	  int n = s.size(), i = 0;
+	  vector<string> factorization;
+	  while (i < n) {
+	    int j = i + 1, k = i;
+	    while (j < n && s[k] <= s[j]) {
+	      if (s[k] < s[j])
+	        k = i;
+	      else
+	        k++;
+	      j++;
+	    }
+	    while (i <= k) {
+	      factorization.push_back(s.substr(i, j - k));
+	      i += j - k;
+	    }
+	  }
+	  return factorization;
+	}
+	\end{lstlisting}
+	
 	\chapter{数据结构}
+	\section{树状数组}
+	\begin{lstlisting}
+	struct BIT {
+	    int c[N];
+	    int lowbit(int x) {return x & (-x);}
+	    void add(int x, int v = 1) {
+	        for(; x < N; x += lowbit(x)) c[x] += v;
+	    }
+	    int query(int x) {
+	        int res = 0;
+	        for(; x; x -= lowbit(x)) res += c[x];
+	        return res;   
+	    }
+	    int query(int l, int r) {
+	        return query(r) - query(l - 1);   
+	    }
+	    //MAX=2^t < N 
+	    int kth(int k) {
+		    int p = 0;
+		    for (int i = MAX >> 1; i; i >>= 1) {
+		        if (c[p + i] < k) {
+		            k -= c[p + i];
+		            p += i;
+		        }
+		    }
+		    return p + 1;
+	    } 
+	}bit;
+	
+	\end{lstlisting}
 	\section{笛卡尔树}
 	\begin{lstlisting}
+// 每个结点由二元组(k,w)组成，k满足二叉搜索树的性质，w满足堆的性质
+// 构建的过程中用栈来维护，有点像单调栈？
 pii b[N];
 struct Cartesian_Tree{
     struct node{
@@ -1934,6 +3161,7 @@ struct Cartesian_Tree{
         return lsz + rsz + 1;
     }
 }CT; 
+
 	\end{lstlisting}
 	\section{线性基}
 	普通线性基就不说了，给出线性基求交集的模板。
@@ -2144,6 +3372,66 @@ int main() {
     return 0;
 }
 	\end{lstlisting}
+	
+	\section{长链剖分}
+	
+	一般用于处理与 深度 有关的dp问题，因为长链剖分本质上是按照深度来进行剖分的，对于重儿子直接转移。不过转移的过程用到了指针来优化。
+	
+	\begin{lstlisting}
+	ll *f[N], *g[N], ans;
+	ll tmp[N << 2], *id = tmp;
+	
+	int len[N], bson[N];
+	void dfs(int u, int fa) {
+	    int Max = 0;
+	    for (auto v : G[u]) if (v != fa) {
+	        dfs(v, u);
+	        if (len[v] > Max) {
+	            Max = len[v];
+	            bson[u] = v;
+	        }
+	    }
+	    len[u] = len[bson[u]] + 1;
+	}
+	void dfs2(int u, int fa) {
+	    f[u][0] = 1;
+	    if (bson[u]) {
+	        //处理重链
+	        int v = bson[u];
+	        f[v] = f[u] + 1;
+	        g[v] = g[u] - 1;
+	        dfs2(v, u);
+	    }
+	    ans += g[u][0];
+	    for (auto v : G[u]) {
+	        if (v == fa || v == bson[u]) continue;
+	        //分配空间
+	        f[v] = id, id += (len[v] << 1);
+	        g[v] = id, id += (len[v] << 1);
+	        dfs2(v, u);
+	        //从轻链转移
+	        for (int i = 0; i < len[v]; i++) {
+	            ans += f[v][i] * g[u][i + 1];
+	            if (i) {
+	                ans += f[u][i - 1] * g[v][i];
+	            }
+	        }
+	        for (int i = 1; i <= len[v]; i++) {
+	            if (i < len[v]) {
+	                g[u][i - 1] += g[v][i];
+	            }
+	            g[u][i] += f[u][i] * f[v][i - 1];
+	            f[u][i] += f[v][i - 1];
+	        }
+	    }
+	}
+	
+	dfs(1, 0);
+	f[1] = id, id += (len[1] << 1);
+	g[1] = id, id += (len[1] << 1);
+	dfs2(1, 0);
+	\end{lstlisting}
+	
 	\section{CDQ分治}
 	题意：
 	现有两种操作，插入和查询，插入操作则插入一个点$(x,y,z)$，查询操作给出两个点$(x1,y1,z1),(x2,y2,z2)$，回答满足$x1≤x≤x2,y1≤y≤y2,z1≤z≤z2$的(x,y,z)的个数为多少。
@@ -2532,7 +3820,584 @@ struct kdtree {
     }
 }kd; 
 	\end{lstlisting}
+	
+	\section{树链剖分}
+	\begin{lstlisting}
+	// 树链剖分
+	// 轻边个数为O(logn)，重链个数为O(logn)，top数组记录的为重链顶点 
+	// 注意bson的初始化，其余可以自动初始化
+	// 注意每个点实际值为dfn[x]
+	// 处理一条链的信息，如果两条链就先跳到一条链上去，然后再操作一次就行 
+	int sz[N], deep[N], bson[N], ff[N];
+	int top[N], dfn[N], T;
+	void dfs(int u, int fa) {
+	    deep[u] = deep[fa] + 1;
+	    sz[u] = 1;
+	    ff[u] = fa;
+	    int Max = -1;
+	    for (auto v : G[u]) {
+	        if (v != fa) {
+	            dfs(v, u);
+	            sz[u] += sz[v];
+	            if (sz[v] > Max) {
+	                Max = sz[v];
+	                bson[u] = v;
+	            }
+	        }
+	    }
+	}
+	
+	void dfs(int u, int fa, int topf) {
+	    dfn[u] = ++T;
+	    top[u] = topf;
+	    if (bson[u] != 0) {
+	        dfs(bson[u], u, topf);
+	    }
+	    for (auto v : G[u]) {
+	        if (v != fa && v != bson[u]) {
+	            dfs(v, u, v);
+	        }
+	    }
+	} 
+	\end{lstlisting}
+	
+	\section{Splay}
+	核心思想是通过splay操作以及上旋操作以保证树随时平衡并且始终满足二叉搜索树的性质。
+	
+	其余的insert、delete、kth等操作都和普通的二叉搜索树类似，只是多了一个上旋操作。
+	
+	* 注意查找某个信息（比如值为x的排名、x的前驱等），若当前权值不存在，先插入并且旋转为根，那么就可以直接开始往下搜答案，最后再删除这个结点即可
+	
+	* 能实现众多功能，亮点在于区间翻转，缺点为常数较大
+	
+	
+	第一份代码是动态插入、删除，第二种是一开始根据序列建一颗二叉搜索树，同时维护结点信息，一般第二种比较常用。第二种我们删除、插入结点只需要通过splay操作找到对应的位置进行操作即可。
+	
+	模板如下：
+	
+	\begin{lstlisting}
+	struct Splay {
+	    // key: 结点的权值  cnt: 结点的个数  size: 子树大小  sz: 结点总数
+	    int f[N], ch[N][2], key[N], cnt[N], size[N], sz = 0, root = 0;
+	    Splay() {sz = root = 0;}
+	    // 清空结点信息
+	    inline void clear(int x) {
+	        ch[x][0] = ch[x][1] = f[x] = key[x] = cnt[x] = size[x] = 0;
+	    }
+	    // 判断当前结点是否为左右儿子
+	    inline int get(int x) {
+	        return ch[f[x]][1] == x;
+	    }
+	    // 更新结点信息
+	    inline void update(int x) {
+	        if (!x) return;
+	        size[x] = cnt[x];
+	        if (ch[x][0]) size[x] += size[ch[x][0]];
+	        if (ch[x][1]) size[x] += size[ch[x][1]];
+	    }
+	    // 上旋操作
+	    inline void rot(int x) {
+	        int old = f[x], oldf = f[old], tp = get(x);
+	        ch[old][tp] = ch[x][tp ^ 1]; f[ch[old][tp]] = old;
+	        f[old] = x; ch[x][tp ^ 1] = old;
+	        f[x] = oldf;
+	        if (oldf) ch[oldf][ch[oldf][1] == old] = x;
+	        update(old); update(x);
+	    }
+	    // 将结点x伸展到根结点以维持整棵树平衡
+	    inline void splay(int x) {
+	        for (int fa; fa = f[x], fa; rot(x))
+	            if (f[fa]) rot(get(x) == get(fa) ? fa : x);
+	        root = x;
+	    }
+	    // 插入结点并且上旋为根结点
+	    inline int insert(int v) {
+	        if (root == 0) {
+	            ++sz; ch[sz][0] = ch[sz][1] = f[sz] = 0;
+	            key[sz] = v; cnt[sz] = 1; size[sz] = 1;
+	            root = sz;
+	            update(root);
+	            return 1;
+	        }
+	        int tot = root, fa = 0;
+	        while (1) {
+	            if (key[tot] == v) {
+	                cnt[tot]++; update(tot), update(fa);
+	                splay(tot);
+	                return cnt[tot];
+	            }
+	            fa = tot;
+	            tot = ch[tot][v > key[tot]];
+	            if (tot == 0) {
+	                ++sz; ch[sz][0] = ch[sz][1] = 0;
+	                key[sz] = v; cnt[sz] = size[sz] = 1;
+	                f[sz] = fa; ch[fa][v > key[fa]] = sz;
+	                update(sz); update(fa); splay(sz);
+	                break;
+	            }
+	        }
+	        return 1;
+	    }
+	    // 查找v的排名，即比v小的数的个数+1，并将其伸展为根结点
+	    inline int rk(int v) {
+	        int ans = 0, tot = root;
+	        while (1) {
+	            if (v < key[tot]) tot = ch[tot][0];
+	            else {
+	                ans += (ch[tot][0] ? size[ch[tot][0]] : 0);
+	                if (v == key[tot]) {
+	                    splay(tot); return ans + 1;
+	                }
+	                ans += cnt[tot];
+	                tot = ch[tot][1];
+	            }
+	        }
+	        return 0;
+	    }
+	    // 查找第k大的值
+	    inline int kth(int x) {
+	        int tot = root;
+	        while (1) {
+	            if (ch[tot][0] && x <= size[ch[tot][0]]) tot = ch[tot][0];
+	            else {
+	                int t = (ch[tot][0] ? size[ch[tot][0]] : 0) + cnt[tot];
+	                if (x <= t) return key[tot];
+	                x -= t; tot = ch[tot][1];
+	            }
+	        }
+	        return -1;
+	    }
+	    // 返回根节点前驱所在位置
+	    inline int prev() {
+	        int tot = ch[root][0];
+	        while (ch[tot][1]) tot = ch[tot][1];
+	        return tot;
+	    }
+	    // 返回根节点后驱所在位置
+	    inline int succ() {
+	        int tot = ch[root][1];
+	        while (ch[tot][0]) tot = ch[tot][0];
+	        return tot;
+	    }
+	    // 删除一个结点，若有两个儿子则取一个前驱/后继作为根，另一个直接拼上
+	    inline void del(int v) {
+	        rk(v);
+	        if (cnt[root] > 1) {
+	            --cnt[root]; update(root); return;
+	        }
+	        if (!ch[root][0] && !ch[root][1]) {
+	            clear(root); root = 0; return;
+	        }
+	        if (!ch[root][0]) {
+	            int old = root; root = ch[root][1]; f[root] = 0;
+	            clear(old); return;
+	        } else if (!ch[root][1]) {
+	            int old = root; root = ch[root][0]; f[root] = 0;
+	            clear(old); return;
+	        }
+	        int x = prev(), old = root;
+	        splay(x); f[ch[old][1]] = x; ch[x][1] = ch[old][1];
+	        clear(old); update(root);
+	    }
+	}tr;
+	\end{lstlisting}
+	
+	下面是实现区间翻转的代码，有几个区别：
+	
+	1.注意rev标记的下传
+	
+	2.头尾哨兵结点的建立，这样方便找l-1和r+1的位置，这样就容易得到[l,r]区间的子树
+	
+	3.rotate操作到指定结点，并且rotate操作时也会下传对应标记以保证正确
+	
+	\begin{lstlisting}
+	#include <bits/stdc++.h>
+	using namespace std;
+	#define INF 0x3f3f3f3f
+	const int N = 1e5 + 5;
+	
+	int a[N];
+	struct Splay{
+	    int f[N], ch[N][2], size[N], rev[N] = {0}, key[N], root, sz;
+	    Splay(){
+	        root = sz = size[0] = rev[0] = f[0] = 0; key[0] = INF;
+	    }
+	    inline int get(int x){return ch[f[x]][1] == x;}
+	    inline void update(int x){
+	        size[x] = size[ch[x][0]] + size[ch[x][1]] + 1;
+	    }
+	    inline void pushdown(int x){
+	        if (!rev[x]) return;
+	        swap(ch[x][0], ch[x][1]);
+	        rev[ch[x][0]] ^= 1; rev[ch[x][1]] ^= 1; rev[x] = 0;
+	    }
+	    // 建二叉搜索树
+	    inline int build(int l, int r, int rt){
+	        if (l > r) return 0;
+	        int m = (l + r) >> 1, tot = ++sz;
+	        key[tot] = a[m]; f[tot] = rt; rev[tot] = 0;
+	        ch[tot][0] = build(l, m - 1, tot);
+	        ch[tot][1] = build(m + 1, r, tot);
+	        update(tot);
+	        return tot;
+	    }
+	    inline void rot(int x){
+	        int old = f[x], oldf = f[old], tp = get(x);
+	        pushdown(old); pushdown(x); // 注意这里的区别
+	        ch[old][tp] = ch[x][tp ^ 1]; f[ch[old][tp]] = old;
+	        ch[x][tp ^ 1] = old; f[old] = x; 
+	        f[x] = oldf;
+	        if (oldf) ch[oldf][ch[oldf][1] == old] = x;
+	        update(old); update(x);
+	    }
+	    inline void splay(int x, int tar){ // 旋转到对应位置
+	        for (int fa; (fa = f[x]) != tar; rot(x))
+	            if (f[fa] != tar)
+	                rot(get(fa) == get(x) ? fa : x);
+	        if (!tar) root = x;
+	    }
+	    inline int rk(int k){
+	        int tot = root;
+	        while (1){
+	            pushdown(tot); // !!
+	            if (k <= size[ch[tot][0]]) tot = ch[tot][0];
+	            else {
+	                k -= size[ch[tot][0]] + 1;
+	                if (!k) return tot;
+	                tot = ch[tot][1];
+	            }
+	        }
+	    }
+	    inline void reverse(int l, int r){
+	        int a = rk(l), b = rk(r + 2); // 找到对应位置
+	        splay(a, 0); splay(b, a); // 分别旋转至对应位置
+	        rev[ch[b][0]] ^= 1; // 打上翻转标记
+	    }
+	    void print(int p){
+	        pushdown(p);
+	        if (ch[p][0]) print(ch[p][0]);
+	        if (key[p] != INF && key[p] > 0) printf("%d ", key[p]);
+	        if (ch[p][1]) print(ch[p][1]);
+	    }
+	}tr;
+	
+	int n, m;
+	void run() {
+	    cin >> n >> m;
+	    for (int i = 1; i <= n; i++) {
+	        a[i + 1] = i;
+	    }
+	    a[1] = 0, a[n + 2] = INF;
+	    tr.root = tr.build(1, n + 2, 0);
+	    while (m--) {
+	        int l, r;
+	        cin >> l >> r;
+	        tr.reverse(l, r);
+	    }
+	    tr.print(tr.root);
+	}
+	int main() {
+	    run();
+	    return 0;
+	}
+	\end{lstlisting}
+	
+	\section{LCT}
+	伸缩自如、变化万千的高级数据结构！
+	
+	跟splay类似，通过几个核心函数就能操作整个世界。
+	
+	lct的思想基于实链剖分，每个点最多一条实边连接其儿子，而这个实边是我们自己决定的，所以就很灵活。多条相邻实边形成一条实链，每条实链我们用一个splay去维护，满足这个splay的中序遍历为这条链自顶向下进行遍历的序列。并且还有一点：认父不认子。所以虚实边转化时原来的实边直接丢掉，直接将一条虚边变为实边即可。具体来说就是添加儿子、修改父亲。
+	
+	核心就为access操作和makeroot操作，一个是将x到根节点的边全拉实，一个是换树根。
+	
+	* 注意pushup和pushdown的使用，稍微不注意就可能会有大问题。
+	
+	* 注意lct的懒标记思想，每次是在一个splay的顶点打上标记就行，然后标记会自动下传不需要关心。具体原理就是每次实边转化为虚边时懒标记会提前下传，并且我们访问一个连通块时（splay、access操作）都会自顶向下传。所以其实只用关心懒标记如何打就行，最后直接询问顶点信息即可。
+	
+	* 遇事不决makeroot。
+	
+	* 可以动态维护生成树，但因为lct不删除处理边权的信息，所以可以将每条边拆为两个没有点权的点连接一个有点权的点，那么每次删边、添边做对应的两次操作就行。
+	
+	\begin{lstlisting}
+	// LCT 维护路径异或值
+	// 虚实相转化的数据结构，配合splay更加灵活与强大
+	// 可支持动态添边、删边、换根等操作，也可代替树剖，因为树是动态的
+	// 特点：1.认父不认子，与儿子的边可以随便断开，但是父亲始终知道是哪个；
+	// 2.中序遍历为树上的一条深度严格递增的实链，每条实链都由一个splay维护；
+	// 3.实链虚链可以相互转化，我们自己确定
+	struct LCT {
+	    #define ls ch[x][0]
+	    #define rs ch[x][1]
+	    int ch[N][2], fa[N], sum[N], val[N];
+	    int tag[N], siz[N];
+	    inline void init(int n) {
+	        for (int i = 1; i <= n; i++) {
+	            ch[i][0] = ch[i][1] = 0;
+	            fa[i] = sum[i] = val[i] = 0;
+	            tag[i] = siz[i] = 0;
+	        }
+	    }
+	    // 注意pushup在哪里用，一般是进行上旋操作时用到
+	    inline void pushup(int x) {
+	        siz[x] = siz[ls] + siz[rs] + 1;
+	        sum[x] = sum[ls] ^ sum[rs] ^ val[x];
+	    }
+	    inline void pushdown(int x) {
+	        if (tag[x]) {
+	            if (ls) swap(ch[ls][0], ch[ls][1]), tag[ls] ^= tag[x];
+	            if (rs) swap(ch[rs][0], ch[rs][1]), tag[rs] ^= tag[x];
+	            tag[x] = 0;
+	        }
+	    }
+	    // 标记要先下传，避免奇奇怪怪的错误
+	    void update(int x) {
+	        if (!isroot(x)) update(fa[x]);
+	        pushdown(x);
+	    }
+	    inline int get(int x) {
+	        return x == ch[fa[x]][1];
+	    }
+	    inline bool isroot(int x) {
+	        return ch[fa[x]][0] != x && ch[fa[x]][1] != x;
+	    }
+	    // 与splay类似，多了一个isroot的判断，rotate时会变换父亲
+	    inline void rotate(int x) {
+	        int y = fa[x], z = fa[y], k = get(x);
+	        if (!isroot(y)) ch[z][ch[z][1] == y] = x;
+	        ch[y][k] = ch[x][k ^ 1]; fa[ch[y][k]] = y;
+	        ch[x][k ^ 1] = y; fa[y] = x; fa[x] = z;
+	        pushup(y), pushup(x);
+	    }
+	    inline void splay(int x) {
+	        update(x);
+	        for (int f = fa[x]; !isroot(x); f = fa[x]) {
+	            if (!isroot(f)) rotate(get(f) == get(x) ? f : x);
+	            rotate(x);
+	        }
+	    }
+	    // 核心操作，将x到当前树中的根这条路径上的边全转化为实边，这样x和根节点在一颗splay里面
+	    // 返回最后得到splay的根节点，如果连用两次，那么就是两个点的lca
+	    inline int access(int x) {
+	        int p;
+	        for (p = 0; x; p = x, x = fa[x]) {
+	            splay(x); ch[x][1] = p; pushup(x);
+	        }
+	        return p;
+	    }
+	    // 重要操作，将整棵树的根变为x，实际上就是一段路径的边方向发生翻转，这样才能使得任意一条链都满足深度递增
+	    inline void makeroot(int x) {
+	        x = access(x); swap(ls, rs);
+	        tag[x] ^= 1;
+	    }
+	    // 链接两个点，如果已联通则不链接
+	    inline void link(int x, int y) {
+	        makeroot(x), splay(x);
+	        makeroot(y), splay(y);
+	        if (fa[x] || fa[y]) return; // 如果在一连通块中，那么有个必然不能为根，所以存在父亲
+	        fa[y] = x;
+	    }
+	    // 提取x~y这条链，并且使得y为splay树根
+	    inline void split(int x, int y) {
+	        makeroot(x); access(y); splay(y);
+	    }
+	    // 切断一条边，注意不存在边的判断
+	    inline void cut(int x, int y) {
+	        makeroot(y); access(x); splay(x);
+	        if (siz[x] != 2 || ls != y) return;
+	        ls = fa[y] = 0;
+	    }
+	    // 寻找x所在连通块的根节点，深度最小那么一直往左子树走即可，最后会使得根节点为splay的树根
+	    inline int find(int x) {
+	        access(x), splay(x);
+	        while (ls) pushdown(x), x = ls;
+	        splay(x); return x;
+	    }
+	    inline void modify(int x, int v) {
+	        splay(x); val[x] = v; pushup(x);
+	    }
+	    inline int query(int x, int y) {
+	        makeroot(x); access(y); splay(y);
+	        return sum[y];
+	    }
+	}lct;
+	
+	\end{lstlisting}
+	
+	打乘法和加法标记的lct:
+	
+	\begin{lstlisting}
+	struct LCT {
+	    #define ls ch[x][0]
+	    #define rs ch[x][1]
+	    int ch[N][2], fa[N], sum[N], val[N];
+	    int add[N], mul[N], tag[N], siz[N];
+	    inline void tagadd(int x, int v) {
+	        sum[x] = (sum[x] + 1ll * v * siz[x] % MOD) % MOD;
+	        val[x] = (val[x] + v) % MOD;
+	        add[x] = (add[x] + v) % MOD;
+	    }
+	    inline void tagmul(int x, int v) {
+	        sum[x] = 1ll * sum[x] * v % MOD;
+	        val[x] = 1ll * val[x] * v % MOD;
+	        add[x] = 1ll * add[x] * v % MOD;
+	        mul[x] = 1ll * mul[x] * v % MOD;
+	    }
+	    inline void init(int n) {
+	        for (int i = 1; i <= n; i++) {
+	            ch[i][0] = ch[i][1] = 0;
+	            fa[i] = sum[i] = 0;
+	            siz[i] = 0;
+	            add[i] = 0, mul[i] = val[i] = 1;
+	        }
+	    }
+	    inline void pushup(int x) {
+	        siz[x] = siz[ls] + siz[rs] + 1;
+	        sum[x] = (sum[ls] + sum[rs] + val[x]) % MOD;
+	    }
+	    inline void pushdown(int x) {
+	        if (tag[x]) {
+	            if (ls) swap(ch[ls][0], ch[ls][1]), tag[ls] ^= tag[x];
+	            if (rs) swap(ch[rs][0], ch[rs][1]), tag[rs] ^= tag[x];
+	            tag[x] = 0;
+	        }
+	        if (mul[x] != 1) {
+	            if (ls) {
+	                tagmul(ls, mul[x]);
+	            }
+	            if (rs) {
+	                tagmul(rs, mul[x]);
+	            }
+	            mul[x] = 1;
+	        }
+	        if (add[x] > 0) {
+	            if (ls) {
+	                tagadd(ls, add[x]);
+	            }
+	            if (rs) {
+	                tagadd(rs, add[x]);
+	            }
+	            add[x] = 0;
+	        }
+	    }
+	    // 对于一个连通块，下放懒标记
+	    void update(int x) {
+	        if (!isroot(x)) update(fa[x]);
+	        pushdown(x);
+	    }
+	    inline int get(int x) {
+	        return x == ch[fa[x]][1];
+	    }
+	    inline bool isroot(int x) {
+	        return ch[fa[x]][0] != x && ch[fa[x]][1] != x;
+	    }
+	    inline void rotate(int x) {
+	        int y = fa[x], z = fa[y], k = get(x);
+	        if (!isroot(y)) ch[z][ch[z][1] == y] = x;
+	        ch[y][k] = ch[x][k ^ 1]; fa[ch[y][k]] = y;
+	        ch[x][k ^ 1] = y; fa[y] = x; fa[x] = z;
+	        pushup(y), pushup(x);
+	    }
+	    // 每次splay时都会提前下传上面连通块的懒标记，然后虚实转化就没问题
+	    inline void splay(int x) {
+	        update(x);
+	        for (int f = fa[x]; !isroot(x); f = fa[x]) {
+	            if (!isroot(f)) rotate(get(f) == get(x) ? f : x);
+	            rotate(x);
+	        }
+	    }
+	    inline int access(int x) {
+	        int p;
+	        for (p = 0; x; p = x, x = fa[x]) {
+	            splay(x); ch[x][1] = p; pushup(x);
+	        }
+	        return p;
+	    }
+	    inline void makeroot(int x) {
+	        x = access(x); swap(ls, rs);
+	        tag[x] ^= 1;
+	    }
+	    inline void link(int x, int y) {
+	        makeroot(x), splay(x);
+	        makeroot(y), splay(y);
+	        if (fa[x] || fa[y]) return; 
+	        fa[y] = x;
+	    }
+	    inline void split(int x, int y) {
+	        makeroot(x); access(y); splay(y);
+	    }
+	    inline void cut(int x, int y) {
+	        makeroot(y); access(x); splay(x);
+	        if (siz[x] != 2 || ls != y) return;
+	        ls = fa[y] = 0;
+	    }
+	    inline int find(int x) {
+	        access(x), splay(x);
+	        while (ls) pushdown(x), x = ls;
+	        splay(x); return x;
+	    }
+	    inline int query(int x, int y) {
+	        makeroot(x); access(y); splay(y);
+	        return sum[y];
+	    }
+	    void update(int x, int y, int op, int v) {
+	        split(y, x);
+	        if (op) tagmul(x, v);
+	        else tagadd(x, v);
+	    }
+	}lct;
+	\end{lstlisting}
+	
 	\chapter{其它}
+	
+	\section{高维前缀和}
+	
+	其实就是FMT。
+	\begin{lstlisting}
+	//子集
+	for(int j = 0; j < n; j++) 
+	    for(int i = 0; i < 1 << n; i++)
+	        if(i >> j & 1) f[i] += f[i ^ (1 << j)];
+	
+	//超集
+	for(int j = 0; j < n; j++) 
+	    for(int i = 0; i < 1 << n; i++)
+	        if(!(i >> j & 1)) f[i] += f[i ^ (1 << j)];
+	
+	\end{lstlisting}
+	
+	\section{正整数拆分}
+	\begin{lstlisting}
+	// 广义五边形数 q[i]=(3i^2[+-]i) / 2
+	
+	// 正整数拆分的生成函数 等于 欧拉函数的倒数 
+	// p[n]=\sum_i (-1)^{i-1} p(n-q_i)
+	// p[n]=p[n-1]+p[n-2]-p[n-5]-p[n-7]...
+	// p[n]表示n的正整数拆分数 
+	// 时间复杂度为 O(n\sqrt{n}) 
+	void init_p(int n, int* p) {
+	    for (int i = 0; i <= n; i++) {
+	        p[i] = 0;
+	    }
+	    auto P = [&] (int i) {
+	        return MP(i * (3 * i - 1) / 2, i * (3 * i + 1) / 2);
+	    };
+	    p[0] = 1;
+	    for (int i = 1; i <= n; i++) {
+	        for (int j = 1;; j++) {
+	            pii val = P(j);
+	            if (val.fi > i) break;
+	            int t = p[i - val.fi];
+	            if (val.se <= i) {
+	                t += p[i - val.se];
+	                if (t >= MOD) t -= MOD;
+	            }
+	            if (!(j & 1)) p[i] = (p[i] + MOD - t) % MOD;
+	            else p[i] = (p[i] + t) % MOD;
+	        }
+	    }
+	} 
+	\end{lstlisting}
 	\section{莫队算法}
 	对区间问题离线处理，按照一定规则排序，之后指针暴力移动就行。
 	核心代码：
@@ -2544,88 +4409,185 @@ for(; l > q[i].l; l--) add(l - 1, 1);
 for(; t < q[i].k; t++) Update(upd[t + 1]);
 for(; t > q[i].k; t--) Update(upd[t]);
 	\end{lstlisting}
-	\section{点分治}
-	优雅的暴力，对于一颗无根树每次以树的重心为根容斥计算答案，本质相当于枚举每一个结点作为路径上面的必经点然后来考虑。
-	复杂度一般为$O(nlogn)$。
 	
-	寻找两点之间路径为$3$的倍数的代码：
+	\section{二维rmq}
 	\begin{lstlisting}
-#include <bits/stdc++.h>
-#define MP make_pair
-#define fi first
-#define se second
-#define INF 0x3f3f3f3f
-using namespace std;
-typedef long long ll;
-typedef pair<int, int> pii;
-const int N = 20005;
-int n;
-vector <pii> g[N];
-int sz[N], mx[N], tsz;
-int d[N];
-int rt, ans, cnt;
-bool vis[N];
-void getrt(int u, int fa) {
-    sz[u] = 1; mx[u] = 0;
-    for(auto it : g[u]) {
-        int v = it.fi;
-        if(v == fa || vis[v]) continue;
-        getrt(v, u);
-        sz[u] += sz[v];
-        if(sz[v] > mx[u]) mx[u] = sz[v];
-    }
-    mx[u] = max(mx[u], tsz - sz[u]);
-    if(mx[u] < mx[rt]) rt = u;
-}
-void dfs2(int u, int D, int fa) {
-    d[++cnt] = D;
-    for(auto it : g[u]) {
-        int v = it.fi, w = it.se;
-        if(vis[v] || v == fa) continue;
-        dfs2(v, D + w, u);
-    }
-}
-int calc() {
-    for(int i = 1; i <= cnt; i++) d[i] %= 3;
-    int tmp[3] = {0, 0, 0};
-    for(int i = 1; i <= cnt; i++) ++tmp[d[i]];
-    int ans = tmp[0] * (tmp[0] - 1) + 2 * (tmp[1] * tmp[2]);
-    return ans;
-}
-void dfs(int u) {
-    vis[u] = 1;
-    cnt = 0; dfs2(u, 0, 0);
-    int tmp = calc();
-    ans += tmp;
-    for(auto it : g[u]) {
-        int v = it.fi, w = it.se;
-        if(vis[v]) continue;
-        cnt = 0, dfs2(v, w, 0);
-        ans -= calc();
-        tsz = sz[v], rt = 0, getrt(v, u);
-        dfs(rt);
-    }
-}
-int gcd(int a, int b) {
-    return b == 0 ? a : gcd(b, a % b);
-}
-int main() {
-    ios::sync_with_stdio(false); cin.tie(0);
-    cin >> n;
-    for(int i = 1; i < n; i++) {
-        int u, v, w; cin >> u >> v >> w;
-        g[u].push_back(MP(v, w)); g[v].push_back(MP(u, w));
-    }
-    tsz = n, mx[0] = INF, getrt(1, 0);
-    dfs(rt);
-    ans += n;
-    int tot = n * n;
-    int g = gcd(tot, ans);
-    ans /= g, tot /= g;
-    cout << ans << '/' << tot;
-    return 0;
-}
+	struct RMQ {
+	    int f[N][N][9][9], g[N][N][9][9];
+	    int mm[N];
+	    void init(int n, int m, int a[][N]) {
+	        mm[0] = -1;
+	        for (int i = 1; i < N; ++i) {
+	            mm[i] = ((i & (i - 1)) == 0) ? mm[i - 1] + 1 : mm[i - 1];
+	        }
+	        for (int i = 1; i <= n; ++i) {
+	            for (int j = 1; j <= m; ++j) {
+	                f[i][j][0][0] = a[i][j];
+	                g[i][j][0][0] = a[i][j];
+	            }
+	        }
+	        for (int ii = 0; ii <= mm[n]; ++ii) {
+	            for (int jj = 0; jj <= mm[m]; ++jj) {
+	                if (ii + jj) {
+	                    for (int i = 1; i + (1 << ii) - 1 <= n; ++i) {
+	                        for (int j = 1; j + (1 << jj) - 1 <= m; ++j) {
+	                            if (ii) {
+	                                f[i][j][ii][jj] = max(f[i][j][ii - 1][jj], f[i + (1 << (ii - 1))][j][ii - 1][jj]);
+	                                g[i][j][ii][jj] = min(g[i][j][ii - 1][jj], g[i + (1 << (ii - 1))][j][ii - 1][jj]);
+	                            } else {
+	                                f[i][j][ii][jj] = max(f[i][j][ii][jj - 1], f[i][j + (1 << (jj - 1))][ii][jj - 1]);
+	                                g[i][j][ii][jj] = min(g[i][j][ii][jj - 1], g[i][j + (1 << (jj - 1))][ii][jj - 1]);
+	                            }
+	                        }
+	                    }
+	                }
+	            }
+	        }
+	    } 
+	    void Max(int &x, short y) {
+	        if (x < y) x = y;
+	    }
+	    void Min(int &x, short y) {
+	        if (x > y) x = y;
+	    }
+	    pII query(int x1, int y1, int x2, int y2) {
+	        int k1 = mm[x2 - x1 + 1];
+	        int k2 = mm[y2 - y1 + 1];
+	        x2 = x2 - (1 << k1) + 1;
+	        y2 = y2 - (1 << k2) + 1;
+	        pII res = pII(-INF, INF); 
+	        Max(res.fi, f[x1][y1][k1][k2]);
+	        Max(res.fi, f[x1][y2][k1][k2]);
+	        Max(res.fi, f[x2][y1][k1][k2]);
+	        Max(res.fi, f[x2][y2][k1][k2]);
+	        Min(res.se, g[x1][y1][k1][k2]);
+	        Min(res.se, g[x1][y2][k1][k2]);
+	        Min(res.se, g[x2][y1][k1][k2]);
+	        Min(res.se, g[x2][y2][k1][k2]);
+	        return res;
+	    }
+	}rmq;
 	\end{lstlisting}
+	
+	\section{点分治}
+	点分治一般用来解决树上路径问题，不断处理重心其实就相当于枚举经过每个点的路径。时间复杂度为 $O(nlogn)$。
+	
+	点分树是将点分治的过程保存下来，即每一层的重心与上一层的重心相连，这样可以做一些待修改的点分治问题，只用考虑当前点到根节点这条链上的结点就行。并且点分树的树高为 $O(logn)$ 的，所以可以直接暴力修改信息。
+	
+	\begin{lstlisting}
+	// 不要忘了dfs前先findroot一次
+	int n, m;
+	vector <pii> G[N];
+	int tsz, rt;
+	int sz[N], Max[N], father[N];
+	bool vis[N];
+	void getrt(int u, int fa) {
+	    sz[u] = 1; Max[u] = 0;
+	    for(auto it : G[u]) {
+	        int v = it.fi, w = it.se;
+	        if(v == fa || vis[v]) continue;
+	        getrt(v, u);
+	        sz[u] += sz[v];
+	        if(sz[v] > Max[u]) Max[u] = sz[v];
+	    }
+	    Max[u] = max(Max[u], tsz - sz[u]);
+	    if(Max[u] < Max[rt]) rt = u;
+	}
+	void findrt(int u, int fa) {
+	    tsz = (sz[u] == 0 ? n : sz[u]);
+	    Max[rt = 0] = INF;
+	    getrt(u, fa);
+	}
+	void dfs(int u, int fa) {
+	    vis[u] = true;
+	    for(auto it : G[u]) {
+	        int v = it.fi;
+	        if(v != fa && !vis[v]) {
+	            findrt(v, u);
+	            father[rt] = u;
+	            dfs(rt, 0);
+	        }
+	    }   
+	}
+	
+	int f[N][20], deep[N], d[N];
+	void dfs2(int u, int fa) {
+	    deep[u] = deep[fa] + 1;
+	    f[u][0] = fa;   
+	    for(int i = 1; i < 20; i++) {
+	        f[u][i] = f[f[u][i - 1]][i - 1];
+	    }    
+	    for(auto it : G[u]) {
+	        int v = it.fi, w = it.se;
+	        if(v != fa) {
+	            d[v] = d[u] + w;
+	            dfs2(v, u);
+	        }
+	    }
+	}
+	int LCA(int x, int y) {
+	    if(deep[x] < deep[y]) swap(x, y);
+	    for(int i = 19; i >= 0; i--) {
+	        if(deep[f[x][i]] >= deep[y]) x = f[x][i];
+	    }   
+	    if(x == y) return x;
+	    for(int i = 19; i >= 0; i--) {
+	        if(f[x][i] != f[y][i]) x = f[x][i], y = f[y][i];   
+	    }
+	    return f[x][0];
+	}
+	 
+	int dis(int x, int y) {
+	    int z = LCA(x, y);
+	    return d[x] + d[y] - 2 * d[z];   
+	} 
+	\end{lstlisting}
+	
+	\section{Floyd判圈法}
+	\begin{lstlisting}
+	// Floyd判圈法
+	// 用于快速判断一个函数的循环节相关信息
+	ll f(ll x) {
+	    //函数
+	    return (x + (x >> 20) + 12345) % MOD;
+	}
+	//first为起点处的值，len为循环节长度，id为循环节起始处坐标，val为循环节起始处的值
+	bool FloydCycle(ll first, ll& len, ll& id, ll& val) {
+	    ll slow, fast;
+	    slow = f(first);
+	    fast = f(f(first));
+	    int cnt = 1;
+	    while(slow != fast && cnt <= 1000000000)
+	    {
+	        //快指针的移动速度是慢指针的2倍
+	        slow = f(slow);
+	        fast = f(f(fast));
+	        cnt++;
+	    }
+	    if(slow != fast) return false;//无环
+	
+	    len = 1;//环的长度
+	    slow = f(slow);
+	    while(slow != fast)
+	    {
+	        slow = f(slow);
+	        len++;
+	    }
+	
+	    id = 0;
+	    slow = first;
+	    while(slow != fast)
+	    {
+	        slow = f(slow);
+	        fast = f(fast);
+	        id++;
+	    }
+	    val = slow;
+	
+	    return true;   
+	} 
+	\end{lstlisting}
+	
 	\section{随机数}
 	\begin{lstlisting}
 mt19937 rnd(time(NULL));
@@ -2682,38 +4644,174 @@ namespace max_matrix{
 	\end{lstlisting}
 	\section{快速读入/输出}
 	\begin{lstlisting}
-struct Istream {
-	template <class T>
-	Istream &operator >>(T &x) {
-		static char ch;static bool neg;
-		for(ch=neg=0;ch<'0' || '9'<ch;neg|=ch=='-',ch=getchar());
-		for(x=0;'0'<=ch && ch<='9';(x*=10)+=ch-'0',ch=getchar());
-		x=neg?-x:x;
-		return *this;
-	}
-}fin;
+template <class T>
+inline void read(T& x) {
+    static char c;
+    x = 0;
+    bool sign = 0;
+    while (!isdigit(c = getchar()))
+        if (c == '-')
+            sign = 1;
+    for (; isdigit(c); x = x * 10 + c - '0', c = getchar())
+        ;
+    if (sign)
+        x = -x;
+}
 
-struct Ostream {
-	template <class T>
-	Ostream &operator <<(T x) {
-		x<0 && (putchar('-'),x=-x);
-		static char stack[233];static int top;
-		for(top=0;x;stack[++top]=x%10+'0',x/=10);
-		for(top==0 && (stack[top=1]='0');top;putchar(stack[top--]));
-		return *this;
-	}
-
-	Ostream &operator <<(char ch) {
-		putchar(ch);
-		return *this;
-	}
-}fout; 
 	\end{lstlisting}
+	
+	再来个更快的：
+	
+	\begin{lstlisting}
+	//快读 
+	//记得FO输出字符，最后要Flush 
+	#define FI(n) FastIO::read(n)
+	#define FO(n) FastIO::write(n)
+	#define Flush FastIO::Fflush()
+	namespace FastIO {
+		const int SIZE = 1 << 16;
+		char buf[SIZE], obuf[SIZE], str[60];
+		int bi = SIZE, bn = SIZE, opt;
+		double D[] = {0.1, 0.01, 0.001, 0.0001, 0.00001, 0.000001, 0.0000001, 0.00000001, 0.000000001, 0.0000000001};
+		int read(char *s) {
+			while (bn) {
+				for (; bi < bn && buf[bi] <= ' '; bi++);
+				if (bi < bn) break;
+				bn = fread(buf, 1, SIZE, stdin);
+				bi = 0;
+			}
+			int sn = 0;
+			while (bn) {
+				for (; bi < bn && buf[bi] > ' '; bi++) s[sn++] = buf[bi];
+				if (bi < bn) break;
+				bn = fread(buf, 1, SIZE, stdin);
+				bi = 0;
+			}
+			s[sn] = 0;
+			return sn;
+		}
+		bool read(int& x) {
+			int n = read(str), bf = 0;
+			if (!n) return 0;
+			int i = 0; if (str[i] == '-') bf = 1, i++; else if (str[i] == '+') i++;
+			for (x = 0; i < n; i++) x = x * 10 + str[i] - '0';
+			if (bf) x = -x;
+			return 1;
+		}
+		bool read(long long& x) {
+			int n = read(str), bf;
+			if (!n) return 0;
+			int i = 0; if (str[i] == '-') bf = -1, i++; else bf = 1;
+			for (x = 0; i < n; i++) x = x * 10 + str[i] - '0';
+			if (bf < 0) x = -x;
+			return 1;
+		}
+		void write(int x) {
+			if (x == 0) obuf[opt++] = '0';
+			else {
+				if (x < 0) obuf[opt++] = '-', x = -x;
+				int sn = 0;
+				while (x) str[sn++] = x % 10 + '0', x /= 10;
+				for (int i = sn - 1; i >= 0; i--) obuf[opt++] = str[i];
+			}
+			if (opt >= (SIZE >> 1)) {
+				fwrite(obuf, 1, opt, stdout);
+				opt = 0;
+			}
+		}
+		void write(long long x) {
+			if (x == 0) obuf[opt++] = '0';
+			else {
+				if (x < 0) obuf[opt++] = '-', x = -x;
+				int sn = 0;
+				while (x) str[sn++] = x % 10 + '0', x /= 10;
+				for (int i = sn - 1; i >= 0; i--) obuf[opt++] = str[i];
+			}
+			if (opt >= (SIZE >> 1)) {
+				fwrite(obuf, 1, opt, stdout);
+				opt = 0;
+			}
+		}
+		void write(unsigned long long x) {
+			if (x == 0) obuf[opt++] = '0';
+			else {
+				int sn = 0;
+				while (x) str[sn++] = x % 10 + '0', x /= 10;
+				for (int i = sn - 1; i >= 0; i--) obuf[opt++] = str[i];
+			}
+			if (opt >= (SIZE >> 1)) {
+				fwrite(obuf, 1, opt, stdout);
+				opt = 0;
+			}
+		}
+		void write(char x) {
+			obuf[opt++] = x;
+			if (opt >= (SIZE >> 1)) {
+				fwrite(obuf, 1, opt, stdout);
+				opt = 0;
+			}
+		}
+		void Fflush() { if (opt) fwrite(obuf, 1, opt, stdout); opt = 0;}
+	};
+	\end{lstlisting}
+	
 	\section{二进制函数}
 	\begin{lstlisting}
 __builtin_popcount(); //1的个数
 __builtin_parity(); //1个数的奇偶
 __builtin_ffs(); //最后一个1的位置 
+	\end{lstlisting}
+	
+	\section{头文件加速}
+	\begin{lstlisting}
+	#pragma comment(linker, "/STACK:25600000,25600000")
+	#pragma GCC optimize(2)
+	#pragma GCC optimize(3)
+	#pragma GCC optimize("Ofast")
+	#pragma GCC optimize("inline")
+	#pragma GCC optimize("-fgcse")
+	#pragma GCC optimize("-fgcse-lm")
+	#pragma GCC optimize("-fipa-sra")
+	#pragma GCC optimize("-ftree-pre")
+	#pragma GCC optimize("-ftree-vrp")
+	#pragma GCC optimize("-fpeephole2")
+	#pragma GCC optimize("-ffast-math")
+	#pragma GCC optimize("-fsched-spec")
+	#pragma GCC optimize("unroll-loops")
+	#pragma GCC optimize("-falign-jumps")
+	#pragma GCC optimize("-falign-loops")
+	#pragma GCC optimize("-falign-labels")
+	#pragma GCC optimize("-fdevirtualize")
+	#pragma GCC optimize("-fcaller-saves")
+	#pragma GCC optimize("-fcrossjumping")
+	#pragma GCC optimize("-fthread-jumps")
+	#pragma GCC optimize("-funroll-loops")
+	#pragma GCC optimize("-fwhole-program")
+	#pragma GCC optimize("-freorder-blocks")
+	#pragma GCC optimize("-fschedule-insns")
+	#pragma GCC optimize("inline-functions")
+	#pragma GCC optimize("-ftree-tail-merge")
+	#pragma GCC optimize("-fschedule-insns2")
+	#pragma GCC optimize("-fstrict-aliasing")
+	#pragma GCC optimize("-fstrict-overflow")
+	#pragma GCC optimize("-falign-functions")
+	#pragma GCC optimize("-fcse-skip-blocks")
+	#pragma GCC optimize("-fcse-follow-jumps")
+	#pragma GCC optimize("-fsched-interblock")
+	#pragma GCC optimize("-fpartial-inlining")
+	#pragma GCC optimize("no-stack-protector")
+	#pragma GCC optimize("-freorder-functions")
+	#pragma GCC optimize("-findirect-inlining")
+	#pragma GCC optimize("-fhoist-adjacent-loads")
+	#pragma GCC optimize("-frerun-cse-after-loop")
+	#pragma GCC optimize("inline-small-functions")
+	#pragma GCC optimize("-finline-small-functions")
+	#pragma GCC optimize("-ftree-switch-conversion")
+	#pragma GCC optimize("-foptimize-sibling-calls")
+	#pragma GCC optimize("-fexpensive-optimizations")
+	#pragma GCC optimize("-funsafe-loop-optimizations")
+	#pragma GCC optimize("inline-functions-called-once")
+	#pragma GCC optimize("-fdelete-null-pointer-checks")
 	\end{lstlisting}
 	
 \end{document}

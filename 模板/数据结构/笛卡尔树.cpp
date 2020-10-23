@@ -1,3 +1,5 @@
+// 每个结点由二元组(k,w)组成，k满足二叉搜索树的性质，w满足堆的性质
+// 构建的过程中用栈来维护，有点像单调栈？
 pii b[N];
 struct Cartesian_Tree{
     struct node{

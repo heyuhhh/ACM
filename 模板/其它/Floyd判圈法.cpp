@@ -1,8 +1,10 @@
+// Floydåˆ¤åœˆæ³•
+// ç”¨äºå¿«é€Ÿåˆ¤æ–­ä¸€ä¸ªå‡½æ•°çš„å¾ªç¯èŠ‚ç›¸å…³ä¿¡æ¯
 ll f(ll x) {
-    //º¯Êı
+    //å‡½æ•°
     return (x + (x >> 20) + 12345) % MOD;
 }
-//firstÎªÆğµã´¦µÄÖµ£¬lenÎªÑ­»·½Ú³¤¶È£¬idÎªÑ­»·½ÚÆğÊ¼´¦×ø±ê£¬valÎªÑ­»·½ÚÆğÊ¼´¦µÄÖµ
+//firstä¸ºèµ·ç‚¹å¤„çš„å€¼ï¼Œlenä¸ºå¾ªç¯èŠ‚é•¿åº¦ï¼Œidä¸ºå¾ªç¯èŠ‚èµ·å§‹å¤„åæ ‡ï¼Œvalä¸ºå¾ªç¯èŠ‚èµ·å§‹å¤„çš„å€¼
 bool FloydCycle(ll first, ll& len, ll& id, ll& val) {
     ll slow, fast;
     slow = f(first);
@@ -10,14 +12,14 @@ bool FloydCycle(ll first, ll& len, ll& id, ll& val) {
     int cnt = 1;
     while(slow != fast && cnt <= 1000000000)
     {
-        //¿ìÖ¸ÕëµÄÒÆ¶¯ËÙ¶ÈÊÇÂıÖ¸ÕëµÄ2±¶
+        //å¿«æŒ‡é’ˆçš„ç§»åŠ¨é€Ÿåº¦æ˜¯æ…¢æŒ‡é’ˆçš„2å€
         slow = f(slow);
         fast = f(f(fast));
         cnt++;
     }
-    if(slow != fast) return false;//ÎŞ»·
+    if(slow != fast) return false;//æ— ç¯
 
-    len = 1;//»·µÄ³¤¶È
+    len = 1;//ç¯çš„é•¿åº¦
     slow = f(slow);
     while(slow != fast)
     {
@@ -36,4 +38,4 @@ bool FloydCycle(ll first, ll& len, ll& id, ll& val) {
     val = slow;
 
     return true;   
-}
+} 
