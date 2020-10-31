@@ -28,3 +28,41 @@ struct dm_hasher {
         return ull(h1(l, r)) << 32 | h2(l, r);
     }
 }hasher;
+
+
+// 双模数hash，同时用链表维护hash值，支持插入hash值以及询问hash值对应的值
+struct Hash {
+    static const int MO = 19260817;
+    int ka[N], kb[N], v[N], head[MO], next[N];
+    int sta[N], top, sz;
+  
+    int getHash(int A, int B) {
+        return (1ll * A * 2333 + B) % MO;
+    }
+    void init() {
+        while (top) {
+            head[sta[top--]] = 0;
+        }
+        sz = 0;
+    }
+    void add(int x, int y, int c) {
+        int ha = getHash(x, y);
+        for (int i = head[ha]; i; i = next[i]) {
+            if (ka[i] == x && kb[i] == y) {
+                v[i] += c;
+                return;
+            }
+        }
+        ka[++sz] = x, kb[sz] = y, v[sz] = c, next[sz] = head[ha], head[ha] = sz;
+        sta[++top] = ha;
+    }
+    int query(int x, int y) {
+        int ha = getHash(x, y);
+        for (int i = head[ha]; i; i = next[i]) {
+            if (ka[i] == x && kb[i] == y) {
+                return v[i];
+            }
+        }
+        return 0;
+    }
+}A, B;
