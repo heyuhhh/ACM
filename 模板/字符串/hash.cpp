@@ -28,6 +28,7 @@ struct dm_hasher {
         return ull(h1(l, r)) << 32 | h2(l, r);
     }
 }hasher;
+<<<<<<< HEAD
 
 
 // 双模数hash，同时用链表维护hash值，支持插入hash值以及询问hash值对应的值
@@ -66,3 +67,5 @@ struct Hash {
         return 0;
     }
 }A, B;
+=======
+>>>>>>> 69e9080b9001e454b6fc968183fcfd8a9df062de

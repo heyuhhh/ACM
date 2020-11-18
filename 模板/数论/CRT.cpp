@@ -1,5 +1,8 @@
+<<<<<<< HEAD
 // 求解一元一次同余方程组
 // 当模数不互质时，两两的答案可以通过exgcd解方程解得
+=======
+>>>>>>> 69e9080b9001e454b6fc968183fcfd8a9df062de
 struct CRT{
     void exgcd(ll a, ll b, ll &g, ll &x, ll &y) {
         if(b == 0) {
@@ -11,7 +14,10 @@ struct CRT{
         x = y;
         y = t - (a / b) * y;
     }
+<<<<<<< HEAD
     // m：模数；a：模意义下的答案；n：项数
+=======
+>>>>>>> 69e9080b9001e454b6fc968183fcfd8a9df062de
     ll china(int m[], int a[], int n) {
         ll M, Mi, d, X, Y, ans;
         M = 1; ans = 0;
@@ -25,6 +31,7 @@ struct CRT{
         return ans;
     }
 }crt; 
+<<<<<<< HEAD
 
 // 扩展中国剩余定理，通过exgcd两两合并答案，两个方程合并为一个方程
 // 注意M=lcm(m_1,m_2)，相当于通解为 x+kM
@@ -53,3 +60,5 @@ ll CRT(const vector<int>& a, const vector<int>& m) {
     }
     return x0;
 }
+=======
+>>>>>>> 69e9080b9001e454b6fc968183fcfd8a9df062de

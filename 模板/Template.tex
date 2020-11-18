@@ -50,9 +50,15 @@
 		
 		\vspace*{3\baselineskip}
 		Edited by \\[\baselineskip] {heyuhhh\par}
+<<<<<<< HEAD
 		{Team \Large 懂的都懂 \normalsize{at Sicau}\par }
 		\vfill
 		{\scshape 2020.10} \\{\large NANCHONG}\par
+=======
+		{Team \Large 万物静默如谜 \normalsize{at Sicau}\par }
+		\vfill
+		{\scshape 2019.10} \\{\large NANCHONG}\par
+>>>>>>> 69e9080b9001e454b6fc968183fcfd8a9df062de
 	\end{titlepage}
 	\newpage            % 封面背后空白页
 	\tableofcontents     % 目录
@@ -116,12 +122,19 @@ int spfa(int s){
 	\end{lstlisting}
 	\section{网络流}
 	\subsection{Dinic}
+<<<<<<< HEAD
 复杂度玄学。
 
 不过在二分图中，用Dinic求最大匹配时间复杂度为$O(n\sqrt{n})$。
     \begin{lstlisting}
 #define INF 0x3f3f3f3f
 template <class T>
+=======
+复杂度玄学
+	\begin{lstlisting}
+#define INF 0x3f3f3f3f
+template <class T> //模板，可处理double类型
+>>>>>>> 69e9080b9001e454b6fc968183fcfd8a9df062de
 struct Dinic{
     struct Edge{
         int v, next;
@@ -272,6 +285,7 @@ struct Min_Cost_Max_Flow {
 	}
 }sol;
 	\end{lstlisting}
+<<<<<<< HEAD
 	不过之前的板子在某些情况下可能会存在问题，一般对时间要求不是很严格的情况可以用下面的板子：
 	\begin{lstlisting}
 struct E {
@@ -341,6 +355,8 @@ struct MCMF {
 } MM;
 
 	\end{lstlisting}
+=======
+>>>>>>> 69e9080b9001e454b6fc968183fcfd8a9df062de
 	\section{连通性}
 	\subsection{有向图强连通分量}
 	Tarjan算法，复杂度$O(n)$，能够求出有向图的极大强连通分量。
@@ -531,16 +547,22 @@ int dirMst(int root){
 } 
 	\end{lstlisting}
 	\subsection{最小生成树计数}
+<<<<<<< HEAD
 	b为基尔霍夫矩阵，即度数矩阵-邻接矩阵，注意这里的邻接矩阵为广义的邻接矩阵，重边会计算多次。
 	\begin{lstlisting}
 ll b[N][N];
 int g[N][N];
+=======
+	b为基尔霍夫矩阵，即度数矩阵-邻接矩阵，注意要考虑重边，重复的边只算一次。
+	\begin{lstlisting}
+>>>>>>> 69e9080b9001e454b6fc968183fcfd8a9df062de
 ll Det(int n){
     int i,j,k;
     ll ret = 1;
     for(i=2;i<=n;i++){
         for(j = i+1;j <= n;j++){
             while(b[j][i]){
+<<<<<<< HEAD
                 ll tmp=b[i][i]/b[j][i];//不存在除不尽的情况
                 for(k = i;k <= n;k++){
                     b[i][k] = (b[i][k] - tmp*b[j][k])%MOD;
@@ -554,6 +576,20 @@ ll Det(int n){
         ret = ret * b[i][i]%MOD;
     }
     if(ret < 0) ret += MOD;
+=======
+                ll tmp=b[i][i]/b[j][i];//不存在除不尽的情况 
+                for(k = i;k <= n;k++)
+                    b[i][k] -= tmp*b[j][k];
+                for(k=i;k<=n;k++)
+                    swap(b[i][k],b[j][k]);  
+                ret = -ret;
+            }
+        }
+        if(!b[i][i]) return 0;
+        ret *= b[i][i];
+    }
+    if(ret < 0) ret = -ret;
+>>>>>>> 69e9080b9001e454b6fc968183fcfd8a9df062de
     return ret;
 }
 	\end{lstlisting}
@@ -638,6 +674,7 @@ int find(int x){
 	
 	二分图的最大团=补图的最大独立集（图不一定是二分图）
 	
+<<<<<<< HEAD
 	以下是匈牙利算法，时间复杂度为$O(nm)$，也可以网络流做，效率更高：
 	\begin{lstlisting}
 struct MaxMatch {
@@ -754,6 +791,32 @@ namespace R {
         return ans;
     }
 }
+=======
+	以下是匈牙利算法，也可以网络流做，效率更高：
+	\begin{lstlisting}
+int match[N],check[N]; 
+int dfs(int x,int nown){
+    for(int i=1;i<=nown;i++){
+        if(!check[i] && link[x][i]){
+            check[i]=1;
+            if(match[i]==-1 || dfs(match[i],nown)){
+                match[i]=x;
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+int hungry(int n1,int m1){
+    memset(match,-1,sizeof(match));
+    int ans=0;
+    for(int i=1;i<=n1;i++){
+        memset(check,0,sizeof(check));
+        ans+=dfs(i,m1);
+    }
+    return ans ;
+} 
+>>>>>>> 69e9080b9001e454b6fc968183fcfd8a9df062de
 	\end{lstlisting}
 	\section{最大团}
 	一般图的做法就是爆搜+减枝，这是个NPC问题。
@@ -879,6 +942,7 @@ int main() {
     return 0;
 }
 	\end{lstlisting}
+<<<<<<< HEAD
 	\section{三元环计数}
 	\begin{lstlisting}
 	auto cmp = [&](int x, int y) {
@@ -1124,12 +1188,17 @@ void Kruskal (vector <pair<int, pii>>& edges) {
 }
 
 	\end{lstlisting}
+=======
+>>>>>>> 69e9080b9001e454b6fc968183fcfd8a9df062de
 	\chapter{数学}
 	\section{素数}
 	\subsection{线性筛}
 	线性筛，每个数都只被其最小质因子筛一次，复杂度$O(n)$。
+<<<<<<< HEAD
 	
 	也能用来筛积性函数，只需要知道函数的递推关系就行。
+=======
+>>>>>>> 69e9080b9001e454b6fc968183fcfd8a9df062de
 	\begin{lstlisting}
 for(int i = 2; i <= n; i++) {
     if(!chk[i]) {
@@ -1142,7 +1211,10 @@ for(int i = 2; i <= n; i++) {
 }
 	\end{lstlisting}
 	\subsection{Miller-Rabin素数测试}
+<<<<<<< HEAD
 	用来测试一个数是否为素数。
+=======
+>>>>>>> 69e9080b9001e454b6fc968183fcfd8a9df062de
 	\begin{lstlisting}
 //记得初始化随机种子
 ll mul(ll a, ll b, ll p) {
@@ -1196,11 +1268,14 @@ bool Miller_Rabin(ll n) {
 	\subsection{扩展欧几里得}
 	求解$ax+by=c,gcd(a,b)|c$的整数解$x,y$，设$g=gcd(a,b)$，通解为$x=x+k*\frac{b}{g},y=y-k*\frac{a}{g}$，最后的解$x=x*c/g,y=y*c/g$。
 	\begin{lstlisting}
+<<<<<<< HEAD
 //扩展欧几里得
 //求解最小正整数解
 //x_0,y_0为方程a'x+b'y=c'的解(除以gcd过后) 
 //x=c'*(x_0+k*b'),y=c'*(y_0-k*a')
 //注意最后要乘上c/gcd 
+=======
+>>>>>>> 69e9080b9001e454b6fc968183fcfd8a9df062de
 void exgcd(ll a, ll b, ll &x, ll &y) {
     if(b == 0) {
         x = 1, y = 0;
@@ -1211,6 +1286,7 @@ void exgcd(ll a, ll b, ll &x, ll &y) {
     x = y;
     y = z - y * (a / b);
 } 
+<<<<<<< HEAD
 ll calc(ll a, ll b, ll c) {
     ll x, y;
     ll g = __gcd(a, b);
@@ -1222,6 +1298,8 @@ ll calc(ll a, ll b, ll c) {
     x *= c; //!!!
     return x;
 }
+=======
+>>>>>>> 69e9080b9001e454b6fc968183fcfd8a9df062de
 	\end{lstlisting}
 	\subsection{类欧几里得}
 	求解$\sum_{i=0}^n \lfloor\frac{ai+b}{c}\rfloor$。
@@ -1261,7 +1339,11 @@ void gao(ll a, ll b, ll c, ll d, ll &x, ll &y) { // a/b < x/y < c/d
 }
 	\end{lstlisting}
 	\section{线性递推求逆元}
+<<<<<<< HEAD
 	求$1,\dots,p-1$模$p$的所有逆元，有公式：$inv[i]=(p-p/i)*inv[p\%i]\%p$
+=======
+	求$1,\dots,p-1$模$p$的所有逆元，有公式：$inv[i]=(p-p/i)*inv[p\%i]\%m$
+>>>>>>> 69e9080b9001e454b6fc968183fcfd8a9df062de
 	
 	证明：设$t=\frac{p}{i},k=p\%i$，就有$t*i+k\equiv 0(\% p)$即$t*i\equiv -k(\% p)$，两边同时除以$i*k$就出来了。
 	
@@ -1291,6 +1373,7 @@ for(int i = 1 ; i <= n ; i++) {
     now++;
 } 
 	\end{lstlisting}
+<<<<<<< HEAD
 	
 	以及浮点数的高斯消元。
 	
@@ -1327,6 +1410,9 @@ for(int i = 1 ; i <= n ; i++) {
 	
 	$\varphi(x)$ 表示 $1..x$ 中与 $x$ 互质的数，如果 $i$ 与 $x$ 互质，那么 $x-i$ 与 $x$ 也互质。
 	
+=======
+	\section{欧拉函数}	
+>>>>>>> 69e9080b9001e454b6fc968183fcfd8a9df062de
 	$\varphi (x)=x\prod_{i=1}^{n}(1-\frac{1}{p_i})$
 	
 	$\varphi * I = id$
@@ -1452,6 +1538,7 @@ ll djs_phi(int n) {
 	
 	最终答案为$S(n,1)+f(1)$。
 	
+<<<<<<< HEAD
 	
 	upd：
 	
@@ -1466,6 +1553,15 @@ ll djs_phi(int n) {
 	\begin{lstlisting}
 //min25筛
 //以f(p^k)=p^k(p^k-1)为例 
+=======
+	\begin{lstlisting}
+//注意1单独考虑
+//g应为完全积性函数，在质数处与f相等
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+const int N = 2e6 + 5, MOD = 1e9 + 7, inv3 = 333333336;
+>>>>>>> 69e9080b9001e454b6fc968183fcfd8a9df062de
 ll n;
 ll sum1[N], sum2[N], prime[N];
 ll w[N], ind1[N], ind2[N];
@@ -1477,7 +1573,10 @@ void pre(int n) { //  \sqrt
     for(int i = 1; i <= n; i++) {
         if(!chk[i]) {
             prime[++tot] = i;
+<<<<<<< HEAD
             // 预处理 \sum f(p)，这里只预处理了根号范围内 
+=======
+>>>>>>> 69e9080b9001e454b6fc968183fcfd8a9df062de
             sum1[tot] = (sum1[tot - 1] + i) % MOD;
             sum2[tot] = (sum2[tot - 1] + 1ll * i * i % MOD) % MOD;
         }
@@ -1487,11 +1586,16 @@ void pre(int n) { //  \sqrt
         }
     }
 }
+<<<<<<< HEAD
 // 筛得\sum f(p), 求出2~n范围内的素数和，注意要去掉1 
 void calc_g() {
     int z = sqrt(n);
     // 预处理，首先将质数的取值扩展到所有数，并且建立映射数组，只有O(sqrt(n))个位置有用 
     // ind数组能对于一个数x，快速找到对应的下标，利用了整除的性质 
+=======
+void calc_g() {
+    int z = sqrt(n);
+>>>>>>> 69e9080b9001e454b6fc968183fcfd8a9df062de
     for(ll i = 1, j; i <= n; i = j + 1) {
         j = n / (n / i);
         w[++cnt] = n / i;
@@ -1500,8 +1604,12 @@ void calc_g() {
         g1[cnt] = g1[cnt] * (g1[cnt] + 1) / 2 % MOD - 1;
         if(n / i <= z) ind1[n / i] = cnt;
         else ind2[n / (n / i)] = cnt;
+<<<<<<< HEAD
     } 
     // 开始筛法，g[j]-=f(p[i])*(g[k]-sum[i-1]) 
+=======
+    }
+>>>>>>> 69e9080b9001e454b6fc968183fcfd8a9df062de
     for(int i = 1; i <= tot; i++) {
         for(int j = 1; j <= cnt && prime[i] * prime[i] <= w[j]; j++) {
             ll tmp = w[j] / prime[i], k;
@@ -1513,6 +1621,7 @@ void calc_g() {
         }
     }
 }
+<<<<<<< HEAD
 // 因为F为积性函数，所以先分两种情况：质数和合数进行考虑 
 ll S(ll x, int y) { // 2~x >= P_y
     if(x <= 1 || prime[y] > x) return 0;
@@ -1522,6 +1631,13 @@ ll S(ll x, int y) { // 2~x >= P_y
     ll ans = (g2[k] - g1[k] + MOD - (sum2[y - 1] - sum1[y - 1]) + MOD) % MOD;
     // 枚举最小质因子及次方，然后递归求解
     // ans+=F(p[i]^e) * S(n/p[i],i+1) + F(p[i]^{e+1})
+=======
+ll S(ll x, int y) { // 2~x >= P_y
+    if(x <= 1 || prime[y] > x) return 0;
+    ll z = sqrt(n);
+    ll k = x <= z ? ind1[x] : ind2[n / x];
+    ll ans = (g2[k] - g1[k] + MOD - (sum2[y - 1] - sum1[y - 1]) + MOD) % MOD;
+>>>>>>> 69e9080b9001e454b6fc968183fcfd8a9df062de
     for(int i = y; i <= tot && prime[i] * prime[i] <= x ; i++) {
         ll pe = prime[i], pe2 = prime[i] * prime[i];
         for(int e = 1; pe2 <= x; ++e, pe = pe2, pe2 *= prime[i]) {
@@ -1530,6 +1646,7 @@ ll S(ll x, int y) { // 2~x >= P_y
     }
     return ans % MOD;
 }
+<<<<<<< HEAD
 	\end{lstlisting}
 	
 	其余示例，求最大质因子不超过$k$的min25筛部分（只需要修改统计质数答案部分即可，本质考察对min25筛和积性函数的理解）：
@@ -1606,6 +1723,18 @@ ll S(ll x, int y) { // 2~x >= P_y
 	一般用于求解一元一次同余方程组的合法解，要求模数为质数。
 	
 	扩展中国剩余定理可以处理模数不互质的情况，这时的大致思想是两两方程列式，通过exgcd来求得合法解，然后不断合并。
+=======
+int main() {
+    cin >> n;
+    int tmp = sqrt(n);
+    pre(tmp);
+    calc_g();
+    cout << (S(n, 1) + 1) % MOD ;
+    return 0;
+}
+	\end{lstlisting}
+	\section{中国剩余定理}
+>>>>>>> 69e9080b9001e454b6fc968183fcfd8a9df062de
 	\begin{lstlisting}
 struct CRT{
     void exgcd(ll a, ll b, ll &g, ll &x, ll &y) {
@@ -1633,6 +1762,7 @@ struct CRT{
 }crt;
 	\end{lstlisting}
 	
+<<<<<<< HEAD
 	\section{Lucas定理}
 	
 	\begin{lstlisting}
@@ -1684,6 +1814,9 @@ struct CRT{
 	  return CRT(cnt, a, p);
 	}
 	\end{lstlisting}
+=======
+	扩展中国剩余定理可以处理模数不互质的情况，直接类似于数学归纳法合并解即可。
+>>>>>>> 69e9080b9001e454b6fc968183fcfd8a9df062de
 	
 	\section{BSGS}
 	求解高次同余方程$a^x\equiv b\mod m$
@@ -1734,6 +1867,7 @@ struct B{
 	若$a^{\frac{p-1}{2}}\equiv -1\mod p$，则$a$为模$p$的非二次剩余。
 	若$a^{\frac{p-1}{2}}\equiv 0\mod p$，则$p|a$。
 	
+<<<<<<< HEAD
 	\begin{lstlisting}
 	const int moder = (int) 1e9 + 7;
 	const int inv2 = (moder + 1) / 2;
@@ -1795,6 +1929,8 @@ struct B{
 	} 
 	
 	\end{lstlisting}
+=======
+>>>>>>> 69e9080b9001e454b6fc968183fcfd8a9df062de
 	\section{欧拉降幂}
 	$$
 	a^b\equiv\left\{
@@ -1827,6 +1963,7 @@ int calc(ll a, ll b, ll m) {
     return qp(a, x, m);
 }
 	\end{lstlisting}
+<<<<<<< HEAD
 
 	\section{多项式全家桶}
 	
@@ -2151,6 +2288,89 @@ int calc(ll a, ll b, ll m) {
 	}
 	\end{lstlisting}
 
+=======
+	\section{FFT}
+	\begin{lstlisting}
+const double pi = acos(-1.0);
+struct C{
+    double x, y;
+    C (double xx = 0, double yy = 0) {x = xx, y = yy;}
+}a[N], b[N], c[N];
+C operator + (C a, C b) {return C(a.x + b.x, a.y + b.y);}
+C operator - (C a, C b) {return C(a.x - b.x, a.y - b.y);}
+C operator * (C a, C b) {return C(a.x * b.x - a.y * b.y, a.x * b.y + a.y * b.x);}
+int l, r[N];
+int lim = 1;
+void solve(C *A, int type) {
+    for(int i = 0; i < lim; i++) if(i < r[i]) swap(A[i], A[r[i]]);
+    for(int mid = 1; mid < lim; mid <<= 1) {
+        C Wn(cos(pi / mid), type * sin(pi / mid)) ;
+        for(int R = mid << 1, j = 0; j < lim; j += R) {
+            C w(1, 0);
+            for(int k = 0; k < mid; k++, w = w * Wn) {
+                C x = A[j + k], y = w * A[j + mid + k];
+                A[j + k] = x + y;
+                A[j + mid + k] = x - y;
+            }
+        }
+    }
+}
+void FFT(C *a, C *b) {
+    while(lim <= n + m) lim <<= 1, l++;
+    for(int i = 0; i < lim; i++) {
+        r[i] = (r[i >> 1] >> 1) | ((i & 1) << (l - 1));
+    }
+    for(int i = n + 1; i < lim; i++) a[i] = C();
+    for(int i = m + 1; i < lim; i++) b[i] = C();
+    solve(a, 1); solve(b, 1);
+    for(int i = 0; i <= lim; i++) c[i] = a[i] * b[i];
+    solve(c, -1);
+    for(int i = 0; i <= n + m; i++) c[i].x = (c[i].x / lim + 0.5);
+}
+	\end{lstlisting}
+	\section{NTT}
+	有模数版FFT，模数一般为998244353。
+	\begin{lstlisting}
+const int N = 4e5 + 5, M = 2e6 + 5, P = 998244353, G = 3, Gi = 332748118;
+int n, m, lim = 1, L, r[N];
+ll a[N], b[N];
+ll qp(ll a, ll k) {
+    ll ans = 1;
+    while(k) {
+        if(k & 1) ans = (ans * a ) % P;
+        a = (a * a) % P;
+        k >>= 1;
+    }
+    return ans;
+}
+void NTT(ll *A, int type) {
+    for(int i = 0; i < lim; i++)
+        if(i < r[i]) swap(A[i], A[r[i]]);
+    for(int mid = 1; mid < lim; mid <<= 1) {
+        ll Wn = qp( type == 1 ? G : Gi , (P - 1) / (mid << 1)); //Wn = g ^ ((p - 1) / n)  (mod p)
+        for(int j = 0; j < lim; j += (mid << 1)) {
+            ll w = 1;
+            for(int k = 0; k < mid; k++, w = (w * Wn) % P) {
+                 int x = A[j + k], y = w * A[j + k + mid] % P;
+                 A[j + k] = (x + y) % P,
+                 A[j + k + mid] = (x - y + P) % P;
+            }
+        }
+    }
+}
+void solve(ll *a, ll *b) {
+    while(lim <= n + m) lim <<= 1, L++;
+    for(int i = 0; i < lim; i++) r[i] = (r[i >> 1] >> 1) | ((i & 1) << (L - 1));
+    for(int i = n + 1; i < lim; i++) a[i] = 0;  //a,b need init
+    for(int i = m + 1; i < lim; i++) b[i] = 0;
+    NTT(a, 1); NTT(b, 1);
+    for(int i = 0; i < lim; i++) a[i] = (a[i] * b[i]) % P;
+    NTT(a, -1);
+    ll inv = qp(lim, P - 2);
+    for(int i = 0; i < lim; i++) a[i] = a[i] * inv % P;
+}
+	\end{lstlisting}
+>>>>>>> 69e9080b9001e454b6fc968183fcfd8a9df062de
 	\section{蔡勒公式}
 	快速判断一天为星期几。
 	\begin{lstlisting}
@@ -2198,12 +2418,84 @@ int work(ll P) {   //p - 1
     }
 } 
 	\end{lstlisting}
+<<<<<<< HEAD
 
+=======
+	\section{二次剩余}
+	\begin{lstlisting}
+//求解x^2=n(mod p)
+const int moder = (int) 1e9 + 7;
+const int inv2 = (moder + 1) / 2;
+ 
+struct field2{
+    int x, y, a, p;
+ 
+    field2():x(0), y(0), a(0), p(0){}
+    field2(int x, int y, int a, int p):x(x), y(y), a(a), p(p){}
+ 
+    field2 operator *(const field2 &f)const{
+        int retx = (1ll * x * f.x + 1ll * y * f.y % p * a) % p;
+        int rety = (1ll * x * f.y + 1ll * y * f.x) % p;
+        return field2(retx, rety, a, p);
+    }
+ 
+    field2 powermod(int exp)const{
+        field2 ret(1, 0, a, p), aux = *this;
+        for ( ; exp > 0; exp >>= 1){
+            if (exp & 1){
+                ret = ret * aux;
+            }
+            aux = aux * aux;
+        }
+        return ret;
+    }
+};
+ 
+int powermod(int a, int exp, int moder){
+    int ret = 1;
+    for ( ; exp; exp >>= 1){
+        if (exp & 1){
+            ret = 1ll * ret * a % moder;
+        }
+        a = 1ll * a * a % moder;
+    }
+    return ret;
+}
+ 
+int randint(int n){
+    return rand() % n;
+}
+vector <int> remain2(int a, int p){ //x^2 = a (mod p)
+    if (!a || p == 2){ //特判 
+        return {a, a};
+    }
+    if (powermod(a, p - 1 >> 1, p) != 1){ //欧拉准则 
+        return {};
+    }
+    while (true){
+        field2 f(randint(p - 1) + 1, randint(p - 1) + 1, a, p);
+        f = f.powermod(p - 1 >> 1);
+        if (f.x){
+            continue;
+        }
+        int ret = powermod(f.y, p - 2, p);
+        return {ret, p - ret};
+    }
+} 
+	\end{lstlisting}
+>>>>>>> 69e9080b9001e454b6fc968183fcfd8a9df062de
 	\section{拉格朗日插值}
 	对于一个$n$次多项式，如果已知其$n+1$项，那么就可以快速求解其他项，若那$n+1$项连续，则可以通过预处理阶乘，复杂度达到$O(n)$。
 	
 	常见应用就为求解$\sum_{i=1}^{n}i^k$，这是一个以$n$为自变量的$k+1$次多项式，应用拉格朗日插值复杂度为$O(k)$。
 
+<<<<<<< HEAD
+=======
+	\begin{figure}[!htb]
+		\centering
+		\includegraphics[width=0.9\textwidth]{chafen}    % 当前tex文件同一目录下名为icpc的任意格式图片
+	\end{figure}
+>>>>>>> 69e9080b9001e454b6fc968183fcfd8a9df062de
 
 	\begin{lstlisting}
 struct Lagrange {
@@ -2243,6 +2535,7 @@ struct Lagrange {
 	}
 }lagrange;
 	\end{lstlisting}
+<<<<<<< HEAD
 	
 	\section{拉格朗日求系数}
 	\begin{lstlisting}
@@ -2283,6 +2576,8 @@ struct Lagrange {
 	}A;
 	\end{lstlisting}
 	
+=======
+>>>>>>> 69e9080b9001e454b6fc968183fcfd8a9df062de
 	\section{BM线性递推}
 	若递推式由前$k$项推出，我们只需要求出前$2k$项，然后传入就行，能够快速求解第$n$项，复杂度为$O(klogn)$。
 	\begin{lstlisting}
@@ -2400,6 +2695,7 @@ int main() {
 }
 	\end{lstlisting}
 	
+<<<<<<< HEAD
 	\section{快速gcd}
 	预处理gcd。
 	\begin{lstlisting}
@@ -2501,6 +2797,8 @@ int main() {
 	}
 	\end{lstlisting}
 	
+=======
+>>>>>>> 69e9080b9001e454b6fc968183fcfd8a9df062de
 	\chapter{字符串}
 	\section{KMP}
 	\begin{lstlisting}
@@ -2604,6 +2902,7 @@ struct Trie{
     }
 }t1, t2;
 	\end{lstlisting}
+<<<<<<< HEAD
 	
 	01trie一般也比较常用，是用来维护二进制相关信息的，可以用来求异或最大值。
 	
@@ -2680,6 +2979,8 @@ struct Trie{
 	}
 	\end{lstlisting}
 	
+=======
+>>>>>>> 69e9080b9001e454b6fc968183fcfd8a9df062de
 	\section{AC自动机}
 	\begin{lstlisting}
 queue <int> q;
@@ -2931,6 +3232,7 @@ int main() {
     return 0;
 }
 	\end{lstlisting}
+<<<<<<< HEAD
 	
 	\section{广义后缀自动机}
 	
@@ -3044,6 +3346,8 @@ int main() {
 	}trie;
 	\end{lstlisting}
 	
+=======
+>>>>>>> 69e9080b9001e454b6fc968183fcfd8a9df062de
 	\section{最小表示法}
 	\begin{lstlisting}
 int getmin(char *s){
@@ -3062,6 +3366,7 @@ int getmin(char *s){
     return i<j?i:j;
 } 
 	\end{lstlisting}
+<<<<<<< HEAD
 	
 	\section{lydon分解}
 	\begin{lstlisting}
@@ -3126,6 +3431,11 @@ int getmin(char *s){
 	\begin{lstlisting}
 // 每个结点由二元组(k,w)组成，k满足二叉搜索树的性质，w满足堆的性质
 // 构建的过程中用栈来维护，有点像单调栈？
+=======
+	\chapter{数据结构}
+	\section{笛卡尔树}
+	\begin{lstlisting}
+>>>>>>> 69e9080b9001e454b6fc968183fcfd8a9df062de
 pii b[N];
 struct Cartesian_Tree{
     struct node{
@@ -3161,7 +3471,10 @@ struct Cartesian_Tree{
         return lsz + rsz + 1;
     }
 }CT; 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 69e9080b9001e454b6fc968183fcfd8a9df062de
 	\end{lstlisting}
 	\section{线性基}
 	普通线性基就不说了，给出线性基求交集的模板。
@@ -3372,6 +3685,7 @@ int main() {
     return 0;
 }
 	\end{lstlisting}
+<<<<<<< HEAD
 	
 	\section{长链剖分}
 	
@@ -3432,6 +3746,8 @@ int main() {
 	dfs2(1, 0);
 	\end{lstlisting}
 	
+=======
+>>>>>>> 69e9080b9001e454b6fc968183fcfd8a9df062de
 	\section{CDQ分治}
 	题意：
 	现有两种操作，插入和查询，插入操作则插入一个点$(x,y,z)$，查询操作给出两个点$(x1,y1,z1),(x2,y2,z2)$，回答满足$x1≤x≤x2,y1≤y≤y2,z1≤z≤z2$的(x,y,z)的个数为多少。
@@ -3820,6 +4136,7 @@ struct kdtree {
     }
 }kd; 
 	\end{lstlisting}
+<<<<<<< HEAD
 	
 	\section{树链剖分}
 	\begin{lstlisting}
@@ -4398,6 +4715,9 @@ struct kdtree {
 	    }
 	} 
 	\end{lstlisting}
+=======
+	\chapter{其它}
+>>>>>>> 69e9080b9001e454b6fc968183fcfd8a9df062de
 	\section{莫队算法}
 	对区间问题离线处理，按照一定规则排序，之后指针暴力移动就行。
 	核心代码：
@@ -4409,6 +4729,7 @@ for(; l > q[i].l; l--) add(l - 1, 1);
 for(; t < q[i].k; t++) Update(upd[t + 1]);
 for(; t > q[i].k; t--) Update(upd[t]);
 	\end{lstlisting}
+<<<<<<< HEAD
 	
 	\section{二维rmq}
 	\begin{lstlisting}
@@ -4588,6 +4909,90 @@ for(; t > q[i].k; t--) Update(upd[t]);
 	} 
 	\end{lstlisting}
 	
+=======
+	\section{点分治}
+	优雅的暴力，对于一颗无根树每次以树的重心为根容斥计算答案，本质相当于枚举每一个结点作为路径上面的必经点然后来考虑。
+	复杂度一般为$O(nlogn)$。
+	
+	寻找两点之间路径为$3$的倍数的代码：
+	\begin{lstlisting}
+#include <bits/stdc++.h>
+#define MP make_pair
+#define fi first
+#define se second
+#define INF 0x3f3f3f3f
+using namespace std;
+typedef long long ll;
+typedef pair<int, int> pii;
+const int N = 20005;
+int n;
+vector <pii> g[N];
+int sz[N], mx[N], tsz;
+int d[N];
+int rt, ans, cnt;
+bool vis[N];
+void getrt(int u, int fa) {
+    sz[u] = 1; mx[u] = 0;
+    for(auto it : g[u]) {
+        int v = it.fi;
+        if(v == fa || vis[v]) continue;
+        getrt(v, u);
+        sz[u] += sz[v];
+        if(sz[v] > mx[u]) mx[u] = sz[v];
+    }
+    mx[u] = max(mx[u], tsz - sz[u]);
+    if(mx[u] < mx[rt]) rt = u;
+}
+void dfs2(int u, int D, int fa) {
+    d[++cnt] = D;
+    for(auto it : g[u]) {
+        int v = it.fi, w = it.se;
+        if(vis[v] || v == fa) continue;
+        dfs2(v, D + w, u);
+    }
+}
+int calc() {
+    for(int i = 1; i <= cnt; i++) d[i] %= 3;
+    int tmp[3] = {0, 0, 0};
+    for(int i = 1; i <= cnt; i++) ++tmp[d[i]];
+    int ans = tmp[0] * (tmp[0] - 1) + 2 * (tmp[1] * tmp[2]);
+    return ans;
+}
+void dfs(int u) {
+    vis[u] = 1;
+    cnt = 0; dfs2(u, 0, 0);
+    int tmp = calc();
+    ans += tmp;
+    for(auto it : g[u]) {
+        int v = it.fi, w = it.se;
+        if(vis[v]) continue;
+        cnt = 0, dfs2(v, w, 0);
+        ans -= calc();
+        tsz = sz[v], rt = 0, getrt(v, u);
+        dfs(rt);
+    }
+}
+int gcd(int a, int b) {
+    return b == 0 ? a : gcd(b, a % b);
+}
+int main() {
+    ios::sync_with_stdio(false); cin.tie(0);
+    cin >> n;
+    for(int i = 1; i < n; i++) {
+        int u, v, w; cin >> u >> v >> w;
+        g[u].push_back(MP(v, w)); g[v].push_back(MP(u, w));
+    }
+    tsz = n, mx[0] = INF, getrt(1, 0);
+    dfs(rt);
+    ans += n;
+    int tot = n * n;
+    int g = gcd(tot, ans);
+    ans /= g, tot /= g;
+    cout << ans << '/' << tot;
+    return 0;
+}
+	\end{lstlisting}
+>>>>>>> 69e9080b9001e454b6fc968183fcfd8a9df062de
 	\section{随机数}
 	\begin{lstlisting}
 mt19937 rnd(time(NULL));
@@ -4644,6 +5049,7 @@ namespace max_matrix{
 	\end{lstlisting}
 	\section{快速读入/输出}
 	\begin{lstlisting}
+<<<<<<< HEAD
 template <class T>
 inline void read(T& x) {
     static char c;
@@ -4755,6 +5161,35 @@ inline void read(T& x) {
 	};
 	\end{lstlisting}
 	
+=======
+struct Istream {
+	template <class T>
+	Istream &operator >>(T &x) {
+		static char ch;static bool neg;
+		for(ch=neg=0;ch<'0' || '9'<ch;neg|=ch=='-',ch=getchar());
+		for(x=0;'0'<=ch && ch<='9';(x*=10)+=ch-'0',ch=getchar());
+		x=neg?-x:x;
+		return *this;
+	}
+}fin;
+
+struct Ostream {
+	template <class T>
+	Ostream &operator <<(T x) {
+		x<0 && (putchar('-'),x=-x);
+		static char stack[233];static int top;
+		for(top=0;x;stack[++top]=x%10+'0',x/=10);
+		for(top==0 && (stack[top=1]='0');top;putchar(stack[top--]));
+		return *this;
+	}
+
+	Ostream &operator <<(char ch) {
+		putchar(ch);
+		return *this;
+	}
+}fout; 
+	\end{lstlisting}
+>>>>>>> 69e9080b9001e454b6fc968183fcfd8a9df062de
 	\section{二进制函数}
 	\begin{lstlisting}
 __builtin_popcount(); //1的个数
@@ -4762,6 +5197,7 @@ __builtin_parity(); //1个数的奇偶
 __builtin_ffs(); //最后一个1的位置 
 	\end{lstlisting}
 	
+<<<<<<< HEAD
 	\section{头文件加速}
 	\begin{lstlisting}
 	#pragma comment(linker, "/STACK:25600000,25600000")
@@ -4814,5 +5250,7 @@ __builtin_ffs(); //最后一个1的位置
 	#pragma GCC optimize("-fdelete-null-pointer-checks")
 	\end{lstlisting}
 	
+=======
+>>>>>>> 69e9080b9001e454b6fc968183fcfd8a9df062de
 \end{document}
 \label{LastPage}
