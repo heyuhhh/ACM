@@ -1,29 +1,45 @@
 //扩展欧几里得
 //求解最小正整数解
-//x_0,y_0为方程a'x+b'y=c'的解(除以gcd过后) 
+//若x_0,y_0为方程a'x+b'y=c'的解(除以gcd过后) 
 //x=c'*(x_0+k*b'),y=c'*(y_0-k*a')
-//注意最后要乘上c/gcd 
-void exgcd(ll a, ll b, ll &x, ll &y) {
-    if(b == 0) {
+//若x_0,y_0为方程ax+by=c的解
+//x=x_0+k*b/g,y=y_0-k*a/g
+ll exgcd(ll a, ll b, ll &x, ll &y) {
+    if (b == 0) {
         x = 1, y = 0;
-        return ;
-    }
-    exgcd(b,a%b,x,y);
-    ll z = x ;
+        return a;
+    }   
+    ll d = exgcd(b, a % b, x, y);
+    ll z = x;
     x = y;
     y = z - y * (a / b);
+    return d;
 } 
-ll calc(ll a, ll b, ll c) {
-    ll x, y;
-    ll g = __gcd(a, b);
-    if(c % g != 0) return -1;
-    a /= g, b /= g, c /= g;
-    exgcd(a, b, x, y);
-<<<<<<< HEAD
-    // x *= c 如果在前面乘以c的话可能得到更小的正整数解
-=======
->>>>>>> 69e9080b9001e454b6fc968183fcfd8a9df062de
-    x = (x % b + b) % b;
-    x *= c; //!!!
+// don't consider g = 0
+bool find_any(ll a, ll b, ll c, ll& x, ll& y, ll& g) {
+    g = exgcd(abs(a), abs(b), x, y);
+    if (c % g == 0) {
+        return false;
+    }
+    x *= c / g;
+    y *= c / g;
+    if (a < 0) x = -x;
+    if (b < 0) y = -y;
+    return true;
+}
+// x>=0
+ll solve(ll a, ll b, ll c) {
+    ll x, y, g;
+    bool f = find_any(a, b, c, x, y, g);
+    if (f == false) return -1;
+    ll k = 1e18;
+    a /= g;
+    if (x < 0) {
+        k = (-x + abs(a) - 1) / abs(a);
+    } else {
+        k = -(x / abs(a));
+    }    
+    if (a < 0) x -= k * a;
+    else x += k * a;
     return x;
 }
