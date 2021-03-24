@@ -4,9 +4,10 @@
 //N:结点个数，M:字符集大小，sam需要乘以一个2
 //其它操作和普通sam类似
 struct SAM {
-    const static int MAXNODE = N * M * 2;
-    const static int M = 10;  //
+    const static int MAXNODE = N * 2;
+    const static int M = 26;  //
     int go[MAXNODE][M], link[MAXNODE], len[MAXNODE];
+    int lc[MAXNODE], lenSorted[MAXNODE], siz[MAXNODE];
     int last, sz, root;
 
     int newnode() {
@@ -37,11 +38,13 @@ struct SAM {
         // if (go[last][ch]) {
         //     int q = go[last][ch];
         //     last = len[last] + 1 == len[q] ? q : split(last, q, ch);
+        //     siz[last] = 1;
         //     return;
         // }
         // ----
         int cur = newnode();
         len[cur] = len[last] + 1;
+        siz[cur] = 1;
         int p = last;
         for (; p && !go[p][ch]; p = link[p]) {
             go[p][ch] = cur;
@@ -62,10 +65,22 @@ struct SAM {
         }
         return ans;
     }
+    void sortLen() {
+        for (int i = 1; i <= sz; i++) lc[i] = 0;
+        for (int i = 1; i <= sz; i++) lc[len[i]]++;
+        for (int i = 2; i <= sz; i++) lc[i] += lc[i - 1];
+        for (int i = 1; i <= sz; i++) lenSorted[lc[len[i]]--] = i;
+    }
+    void getSize() {
+        sortLen();
+        for (int i = sz; i > 0; i--) {
+            siz[link[lenSorted[i]]] += siz[lenSorted[i]];
+        }
+    }    
 }sam;
-int sam_id[N * M];
+int sam_id[N];
 struct Trie {
-    int ch[N * M][M];
+    int ch[N][M];
     int root, cnt, last;
 
     int newnode() {
