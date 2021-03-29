@@ -6,8 +6,8 @@ struct Dinic{
         T flow;
         Edge(){}
         Edge(int v, int next, T flow) : v(v), next(next), flow(flow) {}
-    }e[N << 1];
-    int head[N], tot;
+    }e[M << 1];
+    int head[N], cur[N], tot;
     int dep[N];
     void init() {
         memset(head, -1, sizeof(head)); tot = 0;
@@ -20,6 +20,7 @@ struct Dinic{
     }
     bool BFS(int _S, int _T) {
         memset(dep, 0, sizeof(dep));
+        memcpy(cur, head, sizeof(head));
         queue <int> q; q.push(_S); dep[_S] = 1;
         while(!q.empty()) {
             int u = q.front(); q.pop();
@@ -36,7 +37,8 @@ struct Dinic{
     T dfs(int _S, int _T, T a) {
         T flow = 0, f;
         if(_S == _T || a == 0) return a;
-        for(int i = head[_S]; ~i; i = e[i].next) {
+        for(int i = cur[_S]; ~i; i = e[i].next) {
+            cur[_S] = i;
             int v = e[i].v;
             if(dep[v] != dep[_S] + 1) continue;
             f = dfs(v, _T, min(a, e[i].flow));
